@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <ProjectGuid>{EF2FC201-9206-42A8-9C34-CC8F7277D2F5}</ProjectGuid>
+    <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Gabriel.Cat.Xarxa</RootNamespace>
+    <AssemblyName>Gabriel.Cat.Xarxa</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>Full</DebugType>
+    <Optimize>False</Optimize>
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <DebugSymbols>False</DebugSymbols>
+    <DebugType>None</DebugType>
+    <Optimize>True</Optimize>
+    <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Gabriel.Cat.Utilitats">
+      <HintPath>..\Gabriel.Cat.Utilitats\bin\Debug\Gabriel.Cat.Utilitats.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\Desktop\Sintesis\LlibreriaUsuarisTransportsLineasIParades\bin\Debug\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="PartPrivada\Missatger\Carta.cs" />
+    <Compile Include="PartPrivada\Missatger\CartaConfirmacio.cs" />
+    <Compile Include="PartPrivada\Missatger\CartaPaquet.cs" />
+    <Compile Include="PartPrivada\Missatger\CartaReclamacio.cs" />
+    <Compile Include="PartPrivada\Missatger\Missatger.cs" />
+    <Compile Include="PartPrivada\Missatger\Paquet.cs" />
+    <Compile Include="PartPrivada\Missatger\PartPaquet.cs" />
+    <Compile Include="PartPrivada\Servidors\UsuariLocal.cs" />
+    <Compile Include="PartPrivada\Informador.cs" />
+    <Compile Include="PartPrivada\Servidors\Servidor.cs" />
+    <Compile Include="PartPrivada\Servidors\ServidorLocal.cs" />
+    <Compile Include="PartPrivada\Servidors\ServidorXarxaEnLinea.cs" />
+    <Compile Include="PartPrivada\Servidors\ServidorXarxaLocal.cs" />
+    <Compile Include="PartPrivada\Servidors\UsuariXarxaEnLinea.cs" />
+    <Compile Include="PartPrivada\Servidors\UsuariXarxaLocal.cs" />
+    <Compile Include="PartPrivada\XifratIntern.cs" />
+    <Compile Include="PartPublica\ByteJson.cs" />
+    <Compile Include="PartPublica\IClientMissatgerObject.cs" />
+    <Compile Include="PartPublica\IJson.cs" />
+    <Compile Include="PartPublica\IXifrat.cs" />
+    <Compile Include="PartPublica\JsonObject.cs" />
+    <Compile Include="PartPublica\MissatgerObject.cs" />
+    <Compile Include="PartPublica\StringJson.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
