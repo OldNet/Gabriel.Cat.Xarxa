@@ -80,7 +80,7 @@ namespace Gabriel.Cat
 		}
 		public void Comença()
 		{
-			DecideixServidor();//tengo que saber como montarlo...
+			DecideixServidor();//tengo que saber como montarlo....
 			for(;;)
 			{
 				while(EsServidor);//hace de servidor
