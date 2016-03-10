@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Gabriel.Cat.Xarxa
 {
-    public delegate Task<HttpResponseMessage> SendAsyncEventHandler(HttpRequestMessage request, CancellationToken cancellationToken);
+    public delegate HttpResponseMessage SendAsyncEventHandler(HttpRequestMessage request, CancellationToken cancellationToken);
    public class MensajeHttp : HttpMessageHandler
     {
         private SendAsyncEventHandler sendAsyncMetodo;
@@ -35,7 +35,7 @@ namespace Gabriel.Cat.Xarxa
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            return SendAsyncMetodo(request, cancellationToken);
+            return new Task<HttpResponseMessage>(() => SendAsyncMetodo(request, cancellationToken));
         }
     }
    public class ClienteHttp
