@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="ClaseExtension.cs" />
     <Compile Include="ClienteHttp.cs" />
+    <Compile Include="ClienteHttpServidorSeguro.cs" />
     <Compile Include="PartPrivada\Missatger\Carta.cs" />
     <Compile Include="PartPrivada\Missatger\CartaConfirmacio.cs" />
     <Compile Include="PartPrivada\Missatger\CartaPaquet.cs" />
