@@ -153,12 +153,17 @@ namespace Gabriel.Cat.Xarxa
                         smpResetIntentos.Release();
                 }
             }
-            else if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
+            else 
             {
-                Console.WriteLine("\tLa ip {0} no es valida", ipCliente);
+                if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
+                {
+                    Console.WriteLine("\tLa ip {0} no es valida", ipCliente);
+                }
                 if (!existe)
                 {
                     clientes.Añadir(new ClienteServidorHttpSeguro(conexionNueva) { Bloqueado=true});//añado la conexion a la lista de bloqueados para evitar que se vuelva a comprobar :)
+                    if (ClienteNoSeguro != null)//aviso para se sepa :)
+                        ClienteNoSeguro(clientes[ipCliente]);
                 }
             }
 
