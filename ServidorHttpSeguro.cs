@@ -12,17 +12,19 @@ namespace Gabriel.Cat.Xarxa
     public class ServidorHttpSeguro : ServidorHttp
     {
         public static bool StartTemporizadorResetIntenentosPorDefecto = true;
+
         const int MAXINTENTOSPORDEFECTO = 1000;
         const double TIEMPORENOVARINTENTOSIPPORDEFECTO = 4 * 60 * 60 * 1000;//cada 4 horas
         ListaUnica<ClienteServidorHttpSeguro> clientes;
         System.Timers.Timer tmpResetIntentos;
         System.Threading.Semaphore smpResetIntentos;
         int maxIntentosCliente;
-       
+
         public event ClienteSeguroEventHandler ClienteNoSeguro;
         public event ClienteSeguroEventHandler ClienteSeguro;
         #region Constructores
-        public ServidorHttpSeguro(double tiempoRenovarIntentosIp, int maxIntentosCliente, params string[] prefixes) : base(prefixes)
+        public ServidorHttpSeguro(double tiempoRenovarIntentosIp, int maxIntentosCliente, params string[] prefixes)
+            : base(prefixes)
         {
             MaxIntentosCliente = maxIntentosCliente;
             clientes = new ListaUnica<ClienteServidorHttpSeguro>();
@@ -36,11 +38,14 @@ namespace Gabriel.Cat.Xarxa
 
 
         }
-        public ServidorHttpSeguro(double tiempoRenovarIntentosIp, params string[] prefixes) : this(tiempoRenovarIntentosIp, MAXINTENTOSPORDEFECTO, prefixes)
+        public ServidorHttpSeguro(double tiempoRenovarIntentosIp, params string[] prefixes)
+            : this(tiempoRenovarIntentosIp, MAXINTENTOSPORDEFECTO, prefixes)
         { }
-        public ServidorHttpSeguro(int maxIntentosCliente, params string[] prefixes) : this(TIEMPORENOVARINTENTOSIPPORDEFECTO, maxIntentosCliente, prefixes)
+        public ServidorHttpSeguro(int maxIntentosCliente, params string[] prefixes)
+            : this(TIEMPORENOVARINTENTOSIPPORDEFECTO, maxIntentosCliente, prefixes)
         { }
-        public ServidorHttpSeguro(params string[] prefixes) : this(TIEMPORENOVARINTENTOSIPPORDEFECTO, prefixes)
+        public ServidorHttpSeguro(params string[] prefixes)
+            : this(TIEMPORENOVARINTENTOSIPPORDEFECTO, prefixes)
         { }
         #endregion
         #region Propiedades
@@ -84,32 +89,67 @@ namespace Gabriel.Cat.Xarxa
         private void ControlarAcceso(ServidorHttp servidor, HttpListenerContext conexionNueva)
         {
             ClienteServidorHttpSeguro cliente;
-            IComparable keyClient = conexionNueva.Request.RemoteEndPoint.Address.ToString();
-            bool existe = clientes.ExisteClave(keyClient);
-            if (!ClienteUsaProxyEtc(conexionNueva))
+            string ipCliente = conexionNueva.Request.RemoteEndPoint.Address.ToString();
+            bool existe = clientes.ExisteClave(ipCliente);
+            if (System.Diagnostics.Debugger.IsAttached)
             {
-                if (!existe || existe && !clientes[keyClient].Bloqueado)
+                Console.WriteLine("Hay una nueva conexion de la ip {0}", ipCliente);
+            }
+            if (!ClienteUsaProxyEtc(ipCliente))
+            {
+                if (System.Diagnostics.Debugger.IsAttached)
                 {
+                    Console.WriteLine("La ip {0} no usa proxys ni nada por el estilo", ipCliente);
+                }
+                if (!existe || existe && !clientes[ipCliente].Bloqueado)
+                {
+                    if (System.Diagnostics.Debugger.IsAttached)
+                    {
+                        Console.WriteLine("La ip {0} es valida", ipCliente);
+                    }
                     try
                     {
                         if (tmpResetIntentos.Enabled)
                             smpResetIntentos.WaitOne();//hace que vayan uno a uno...quizas pierde rendimiento
-                        if (!clientes.ExisteClave(keyClient))
+                        if (!clientes.ExisteClave(ipCliente))
                         {
+                            if (System.Diagnostics.Debugger.IsAttached)
+                            {
+                                Console.WriteLine("La ip {0} es nueva", ipCliente);
+                            }
                             cliente = new ClienteServidorHttpSeguro(conexionNueva);
                             clientes.Añadir(cliente);
                         }
                         else
                         {
-                            cliente = clientes[keyClient];
+                            cliente = clientes[ipCliente];
                             cliente.Client = conexionNueva;//es una nueva conexion :)
+                            cliente.AñadirConexion();
+                            if (System.Diagnostics.Debugger.IsAttached)
+                            {
+                                Console.WriteLine("La ip {0} lleva {1} conexiones", ipCliente,cliente.Conexiones);
+                            }
                         }
-                        cliente.AñadirConexion();
-                        if (cliente.Conexiones >= maxIntentosCliente && ClienteNoSeguro != null)
-                            ClienteNoSeguro(cliente);
+
+                        if (cliente.Conexiones >= maxIntentosCliente)//si supera el maximo de intentos por conexion
+                        {
+                            if (System.Diagnostics.Debugger.IsAttached)
+                            {
+                                Console.WriteLine("La ip {0} supera las conexiones de un cliente normal", ipCliente, cliente.Conexiones);
+                            }
+                            if (ClienteNoSeguro != null)
+                                ClienteNoSeguro(cliente);
+                        }
                         else if (ClienteSeguro != null)
+                        {
+                            if (System.Diagnostics.Debugger.IsAttached)
+                            {
+                                Console.WriteLine("La ip {0} es un cliente normal", ipCliente, cliente.Conexiones);
+                            }
                             ClienteSeguro(cliente);
-                        cliente.Client.Response.OutputStream.Flush();
+                        }
+
+                        cliente.Client.Response.OutputStream.Flush();//envio y limpio la conexion
                         conexionNueva.Response.Close();//si la cierro para los que estan bloqueados luego pueden volver a enviar (al menos los relentizo) asi que solo la cierro para los que son validos :)
                     }
                     catch (Exception excepcion) { throw excepcion; }//si hay algun problema lanzo la excepcion
@@ -119,30 +159,48 @@ namespace Gabriel.Cat.Xarxa
                             smpResetIntentos.Release();
                     }
                 }
+                else if (System.Diagnostics.Debugger.IsAttached)
+                {
+                    Console.WriteLine("La ip {0} no es valida", ipCliente);
+                }
             }
-              
-        }
 
-        private bool ClienteUsaProxyEtc(HttpListenerContext conexionNueva)
+        }
+        /// <summary>
+        /// Valida la Ip
+        /// </summary>
+        /// <param name="conexionNueva"></param>
+        /// <returns></returns>
+        protected virtual bool ClienteUsaProxyEtc(string ipAComprobar)//lo hago virtual para que los que hereden puedan cambiar de sitio web :)
         {
             const char USAPROXYETC = '1';
-            string pathWebConIp = "http://check.getipintel.net/check.php?ip=" + conexionNueva.Request.RemoteEndPoint.Address.ToString();
-            Console.WriteLine(pathWebConIp);
+            string pathWebConIp = "http://check.getipintel.net/check.php?ip=" + ipAComprobar;
+            if (System.Diagnostics.Debugger.IsAttached)
+            {
+                Console.WriteLine("Se usara la web '{0}' para validar la ip", pathWebConIp);
+            }
             System.Net.Http.HttpClient cliente = new System.Net.Http.HttpClient();
-            Task<System.Net.Http.HttpResponseMessage> respuesta= cliente.GetAsync(pathWebConIp);
+            Task<System.Net.Http.HttpResponseMessage> respuesta = cliente.GetAsync(pathWebConIp);
             Task<string> datosRespuesta;
             string respuestaString;
             respuesta.Wait();
-            datosRespuesta= respuesta.Result.Content.ReadAsStringAsync();//metodo para mirarlo online :)
+            datosRespuesta = respuesta.Result.Content.ReadAsStringAsync();//metodo para mirarlo online :)
             datosRespuesta.Wait();
-            respuestaString= datosRespuesta.Result;
-            Console.WriteLine(respuestaString);
+            respuestaString = datosRespuesta.Result;
+            if (System.Diagnostics.Debugger.IsAttached)
+            {
+                Console.WriteLine("La respuesta de la web '{0}'", respuestaString);
+            }
             return respuestaString.Contains(USAPROXYETC);
         }
 
         private void ResetIntentos(object sender, ElapsedEventArgs e)
         {
             smpResetIntentos.WaitOne();
+            if (System.Diagnostics.Debugger.IsAttached)
+            {
+                Console.WriteLine("Vacio la lista de clientes");
+            }
             clientes.Vaciar();//como cada peticion es una conexion nueva,para no guardar muchos clientes que ya se les habra cambiado la ip pues  vacio la lista :)
             smpResetIntentos.Release();
         }
@@ -157,7 +215,7 @@ namespace Gabriel.Cat.Xarxa
             if (client == null)
                 throw new NullReferenceException();
             this.client = client;
-            this.conexiones = 0;
+            this.conexiones = 1;
             bloqueado = false;
         }
 
