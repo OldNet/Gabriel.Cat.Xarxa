@@ -100,7 +100,7 @@ namespace Gabriel.Cat.Xarxa
             {
                 if (System.Diagnostics.Debugger.IsAttached)
                 {
-                    Console.WriteLine("La ip {0} no usa proxys ni nada por el estilo y es valida", ipCliente);
+                    Console.WriteLine("\tLa ip {0} no usa proxys ni nada por el estilo y es valida", ipCliente);
                 }
                 try
                 {
@@ -110,7 +110,7 @@ namespace Gabriel.Cat.Xarxa
                     {
                         if (System.Diagnostics.Debugger.IsAttached)
                         {
-                            Console.WriteLine("La ip {0} es nueva", ipCliente);
+                            Console.WriteLine("\tLa ip {0} es nueva", ipCliente);
                         }
                         cliente = new ClienteServidorHttpSeguro(conexionNueva);
                         clientes.Añadir(cliente);
@@ -122,7 +122,7 @@ namespace Gabriel.Cat.Xarxa
                         cliente.AñadirConexion();
                         if (System.Diagnostics.Debugger.IsAttached)
                         {
-                            Console.WriteLine("La ip {0} lleva {1} conexiones", ipCliente, cliente.Conexiones);
+                            Console.WriteLine("\tLa ip {0} lleva {1} conexiones", ipCliente, cliente.Conexiones);
                         }
                     }
 
@@ -130,7 +130,7 @@ namespace Gabriel.Cat.Xarxa
                     {
                         if (System.Diagnostics.Debugger.IsAttached)
                         {
-                            Console.WriteLine("La ip {0} supera las conexiones de un cliente normal", ipCliente, cliente.Conexiones);
+                            Console.WriteLine("\tLa ip {0} supera las conexiones de un cliente normal", ipCliente, cliente.Conexiones);
                         }
                         if (ClienteNoSeguro != null)
                             ClienteNoSeguro(cliente);
@@ -139,7 +139,7 @@ namespace Gabriel.Cat.Xarxa
                     {
                         if (System.Diagnostics.Debugger.IsAttached)
                         {
-                            Console.WriteLine("La ip {0} es un cliente normal", ipCliente, cliente.Conexiones);
+                            Console.WriteLine("\tLa ip {0} es un cliente normal", ipCliente, cliente.Conexiones);
                         }
                         ClienteSeguro(cliente);
                     }
@@ -156,7 +156,7 @@ namespace Gabriel.Cat.Xarxa
             }
             else if (System.Diagnostics.Debugger.IsAttached)
             {
-                Console.WriteLine("La ip {0} no es valida", ipCliente);
+                Console.WriteLine("\tLa ip {0} no es valida", ipCliente);
             }
 
 
@@ -168,6 +168,7 @@ namespace Gabriel.Cat.Xarxa
         /// <returns></returns>
         protected virtual bool ClienteUsaProxyEtc(string ipAComprobar)//lo hago virtual para que los que hereden puedan cambiar de sitio web :)
         {
+            //esta web mira proxy,vpn,red TOR y bad ip detection
             const char USAPROXYETC = '1';
             string pathWebConIp = "http://check.getipintel.net/check.php?ip=" + ipAComprobar;
             if (System.Diagnostics.Debugger.IsAttached)
