@@ -96,7 +96,7 @@ namespace Gabriel.Cat.Xarxa
             {
                 Console.WriteLine("Hay una nueva conexion de la ip {0}", ipCliente);
             }
-            if (existe && !clientes[ipCliente].Bloqueado || !ClienteUsaProxyEtc(ipCliente))//valido aqui que no este bloqueado para no tener que comprobar su ip en vano :)
+            if (existe && !clientes[ipCliente].Bloqueado || !existe && !ClienteUsaProxyEtc(ipCliente))//valido aqui que no este bloqueado para no tener que comprobar su ip en vano :)
             {
                 if (System.Diagnostics.Debugger.IsAttached)
                 {
