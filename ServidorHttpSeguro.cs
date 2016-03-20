@@ -96,75 +96,74 @@ namespace Gabriel.Cat.Xarxa
             {
                 Console.WriteLine("Hay una nueva conexion de la ip {0}", ipCliente);
             }
-            if (!ClienteUsaProxyEtc(ipCliente))
+            if (existe && !clientes[ipCliente].Bloqueado || !ClienteUsaProxyEtc(ipCliente))//valido aqui que no este bloqueado para no tener que comprobar su ip en vano :)
             {
                 if (System.Diagnostics.Debugger.IsAttached)
                 {
                     Console.WriteLine("La ip {0} no usa proxys ni nada por el estilo", ipCliente);
                 }
-                if (!existe || existe && !clientes[ipCliente].Bloqueado)
+
+                if (System.Diagnostics.Debugger.IsAttached)
                 {
-                    if (System.Diagnostics.Debugger.IsAttached)
-                    {
-                        Console.WriteLine("La ip {0} es valida", ipCliente);
-                    }
-                    try
-                    {
-                        if (tmpResetIntentos.Enabled)
-                            smpResetIntentos.WaitOne();//hace que vayan uno a uno...quizas pierde rendimiento
-                        if (!clientes.ExisteClave(ipCliente))
-                        {
-                            if (System.Diagnostics.Debugger.IsAttached)
-                            {
-                                Console.WriteLine("La ip {0} es nueva", ipCliente);
-                            }
-                            cliente = new ClienteServidorHttpSeguro(conexionNueva);
-                            clientes.Añadir(cliente);
-                        }
-                        else
-                        {
-                            cliente = clientes[ipCliente];
-                            cliente.Client = conexionNueva;//es una nueva conexion :)
-                            cliente.AñadirConexion();
-                            if (System.Diagnostics.Debugger.IsAttached)
-                            {
-                                Console.WriteLine("La ip {0} lleva {1} conexiones", ipCliente,cliente.Conexiones);
-                            }
-                        }
-
-                        if (cliente.Conexiones >= maxIntentosCliente)//si supera el maximo de intentos por conexion
-                        {
-                            if (System.Diagnostics.Debugger.IsAttached)
-                            {
-                                Console.WriteLine("La ip {0} supera las conexiones de un cliente normal", ipCliente, cliente.Conexiones);
-                            }
-                            if (ClienteNoSeguro != null)
-                                ClienteNoSeguro(cliente);
-                        }
-                        else if (ClienteSeguro != null)
-                        {
-                            if (System.Diagnostics.Debugger.IsAttached)
-                            {
-                                Console.WriteLine("La ip {0} es un cliente normal", ipCliente, cliente.Conexiones);
-                            }
-                            ClienteSeguro(cliente);
-                        }
-
-                        cliente.Client.Response.OutputStream.Flush();//envio y limpio la conexion
-                        conexionNueva.Response.Close();//si la cierro para los que estan bloqueados luego pueden volver a enviar (al menos los relentizo) asi que solo la cierro para los que son validos :)
-                    }
-                    catch (Exception excepcion) { throw excepcion; }//si hay algun problema lanzo la excepcion
-                    finally
-                    {
-                        if (tmpResetIntentos.Enabled)
-                            smpResetIntentos.Release();
-                    }
+                    Console.WriteLine("La ip {0} es valida", ipCliente);
                 }
-                else if (System.Diagnostics.Debugger.IsAttached)
+                try
                 {
-                    Console.WriteLine("La ip {0} no es valida", ipCliente);
+                    if (tmpResetIntentos.Enabled)
+                        smpResetIntentos.WaitOne();//hace que vayan uno a uno...quizas pierde rendimiento
+                    if (!clientes.ExisteClave(ipCliente))
+                    {
+                        if (System.Diagnostics.Debugger.IsAttached)
+                        {
+                            Console.WriteLine("La ip {0} es nueva", ipCliente);
+                        }
+                        cliente = new ClienteServidorHttpSeguro(conexionNueva);
+                        clientes.Añadir(cliente);
+                    }
+                    else
+                    {
+                        cliente = clientes[ipCliente];
+                        cliente.Client = conexionNueva;//es una nueva conexion :)
+                        cliente.AñadirConexion();
+                        if (System.Diagnostics.Debugger.IsAttached)
+                        {
+                            Console.WriteLine("La ip {0} lleva {1} conexiones", ipCliente, cliente.Conexiones);
+                        }
+                    }
+
+                    if (cliente.Conexiones >= maxIntentosCliente)//si supera el maximo de intentos por conexion
+                    {
+                        if (System.Diagnostics.Debugger.IsAttached)
+                        {
+                            Console.WriteLine("La ip {0} supera las conexiones de un cliente normal", ipCliente, cliente.Conexiones);
+                        }
+                        if (ClienteNoSeguro != null)
+                            ClienteNoSeguro(cliente);
+                    }
+                    else if (ClienteSeguro != null)
+                    {
+                        if (System.Diagnostics.Debugger.IsAttached)
+                        {
+                            Console.WriteLine("La ip {0} es un cliente normal", ipCliente, cliente.Conexiones);
+                        }
+                        ClienteSeguro(cliente);
+                    }
+
+                    cliente.Client.Response.OutputStream.Flush();//envio y limpio la conexion
+                    conexionNueva.Response.Close();//si la cierro para los que estan bloqueados luego pueden volver a enviar (al menos los relentizo) asi que solo la cierro para los que son validos :)
+                }
+                catch (Exception excepcion) { throw excepcion; }//si hay algun problema lanzo la excepcion
+                finally
+                {
+                    if (tmpResetIntentos.Enabled)
+                        smpResetIntentos.Release();
                 }
             }
+            else if (System.Diagnostics.Debugger.IsAttached)
+            {
+                Console.WriteLine("La ip {0} no es valida", ipCliente);
+            }
+
 
         }
         /// <summary>
@@ -190,7 +189,7 @@ namespace Gabriel.Cat.Xarxa
             respuestaString = datosRespuesta.Result;
             if (System.Diagnostics.Debugger.IsAttached)
             {
-                Console.WriteLine("La respuesta de la web '{0}' para la ip {1}", respuestaString,ipAComprobar);
+                Console.WriteLine("La respuesta de la web '{0}' para la ip {1}", respuestaString, ipAComprobar);
             }
             return respuestaString.Contains(USAPROXYETC);
         }
