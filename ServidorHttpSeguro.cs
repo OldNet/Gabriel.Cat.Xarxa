@@ -100,12 +100,7 @@ namespace Gabriel.Cat.Xarxa
             {
                 if (System.Diagnostics.Debugger.IsAttached)
                 {
-                    Console.WriteLine("La ip {0} no usa proxys ni nada por el estilo", ipCliente);
-                }
-
-                if (System.Diagnostics.Debugger.IsAttached)
-                {
-                    Console.WriteLine("La ip {0} es valida", ipCliente);
+                    Console.WriteLine("La ip {0} no usa proxys ni nada por el estilo y es valida", ipCliente);
                 }
                 try
                 {
