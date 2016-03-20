@@ -12,7 +12,6 @@ namespace Gabriel.Cat.Xarxa
     public class ServidorHttpSeguro : ServidorHttp
     {
         public static bool StartTemporizadorResetIntenentosPorDefecto = true;
-
         const int MAXINTENTOSPORDEFECTO = 1000;
         const double TIEMPORENOVARINTENTOSIPPORDEFECTO = 4 * 60 * 60 * 1000;//cada 4 horas
 
@@ -92,13 +91,13 @@ namespace Gabriel.Cat.Xarxa
             ClienteServidorHttpSeguro cliente;
             string ipCliente = conexionNueva.Request.RemoteEndPoint.Address.ToString();
             bool existe = clientes.ExisteClave(ipCliente);
-            if (System.Diagnostics.Debugger.IsAttached)
+            if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
             {
                 Console.WriteLine("Hay una nueva conexion de la ip {0}", ipCliente);
             }
             if (existe && !clientes[ipCliente].Bloqueado || !existe && !ClienteUsaProxyEtc(ipCliente))//valido aqui que no este bloqueado para no tener que comprobar su ip en vano :)
             {
-                if (System.Diagnostics.Debugger.IsAttached)
+                if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
                 {
                     Console.WriteLine("\tLa ip {0} no usa proxys ni nada por el estilo y es valida", ipCliente);
                 }
@@ -108,7 +107,7 @@ namespace Gabriel.Cat.Xarxa
                         smpResetIntentos.WaitOne();//hace que vayan uno a uno...quizas pierde rendimiento
                     if (!clientes.ExisteClave(ipCliente))
                     {
-                        if (System.Diagnostics.Debugger.IsAttached)
+                        if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
                         {
                             Console.WriteLine("\tLa ip {0} es nueva", ipCliente);
                         }
@@ -120,7 +119,7 @@ namespace Gabriel.Cat.Xarxa
                         cliente = clientes[ipCliente];
                         cliente.Client = conexionNueva;//es una nueva conexion :)
                         cliente.AñadirConexion();
-                        if (System.Diagnostics.Debugger.IsAttached)
+                        if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
                         {
                             Console.WriteLine("\tLa ip {0} lleva {1} conexiones", ipCliente, cliente.Conexiones);
                         }
@@ -128,7 +127,7 @@ namespace Gabriel.Cat.Xarxa
 
                     if (cliente.Conexiones >= maxIntentosCliente)//si supera el maximo de intentos por conexion
                     {
-                        if (System.Diagnostics.Debugger.IsAttached)
+                        if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
                         {
                             Console.WriteLine("\tLa ip {0} supera las conexiones de un cliente normal", ipCliente, cliente.Conexiones);
                         }
@@ -137,7 +136,7 @@ namespace Gabriel.Cat.Xarxa
                     }
                     else if (ClienteSeguro != null)
                     {
-                        if (System.Diagnostics.Debugger.IsAttached)
+                        if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
                         {
                             Console.WriteLine("\tLa ip {0} es un cliente normal", ipCliente, cliente.Conexiones);
                         }
@@ -154,7 +153,7 @@ namespace Gabriel.Cat.Xarxa
                         smpResetIntentos.Release();
                 }
             }
-            else if (System.Diagnostics.Debugger.IsAttached)
+            else if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
             {
                 Console.WriteLine("\tLa ip {0} no es valida", ipCliente);
             }
@@ -171,7 +170,7 @@ namespace Gabriel.Cat.Xarxa
             //esta web mira proxy,vpn,red TOR y bad ip detection
             const char USAPROXYETC = '1';
             string pathWebConIp = "http://check.getipintel.net/check.php?ip=" + ipAComprobar;
-            if (System.Diagnostics.Debugger.IsAttached)
+            if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
             {
                 Console.WriteLine("Se usara la web '{0}' para validar la ip", pathWebConIp);
             }
@@ -183,7 +182,7 @@ namespace Gabriel.Cat.Xarxa
             datosRespuesta = respuesta.Result.Content.ReadAsStringAsync();//metodo para mirarlo online :)
             datosRespuesta.Wait();
             respuestaString = datosRespuesta.Result;
-            if (System.Diagnostics.Debugger.IsAttached)
+            if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
             {
                 Console.WriteLine("La respuesta de la web '{0}' para la ip {1}", respuestaString, ipAComprobar);
             }
@@ -193,7 +192,7 @@ namespace Gabriel.Cat.Xarxa
         private void ResetIntentos(object sender, ElapsedEventArgs e)
         {
             smpResetIntentos.WaitOne();
-            if (System.Diagnostics.Debugger.IsAttached)
+            if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
             {
                 Console.WriteLine("Vacio la lista de clientes");
             }

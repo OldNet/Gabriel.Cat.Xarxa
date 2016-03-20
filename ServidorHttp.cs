@@ -6,10 +6,12 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Gabriel.Cat.Xarxa
-{//falta probarla :D
+{
     public delegate void ServidorHttpEventHanlder(ServidorHttp servidor, HttpListenerContext conexion);
     public class ServidorHttp
     {
+        public static bool ShowDebbugMessages = true;//asi se pueden ver sin debugear :)
+
         System.Net.HttpListener listener;
         Tiket<Object> tiketListener;
         public long IdServidor { get; private set; }
@@ -53,7 +55,7 @@ namespace Gabriel.Cat.Xarxa
                     }
                 }, null);
                 tiketListener.AñadirPool();
-                if (System.Diagnostics.Debugger.IsAttached)
+                if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
                 {
                     Console.WriteLine("El servidor id='{0}' esta encendido", IdServidor);
                 }
@@ -68,7 +70,7 @@ namespace Gabriel.Cat.Xarxa
                 listener.Close();
                 tiketListener.AbortaTrabajo();
                 tiketListener = null;
-                if (System.Diagnostics.Debugger.IsAttached)
+                if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
                 {
                     Console.WriteLine("El servidor id='{0}' esta parado", IdServidor);
                 }
