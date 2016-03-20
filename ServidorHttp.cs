@@ -21,8 +21,7 @@ namespace Gabriel.Cat.Xarxa
         public ServidorHttp()
         {
             if (!HttpListener.IsSupported)//lo pongo por seguridad :D
-                throw new NotSupportedException(
-                    "Needs Windows XP SP2, Server 2003 or later.");
+                throw new NotSupportedException("Needs Windows XP SP2, Server 2003 or later.");
             listener = new System.Net.HttpListener();
             IdServidor = DateTime.Now.Ticks;
         }
