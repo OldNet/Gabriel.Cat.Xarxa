@@ -15,6 +15,7 @@ namespace Gabriel.Cat.Xarxa
 
         const int MAXINTENTOSPORDEFECTO = 1000;
         const double TIEMPORENOVARINTENTOSIPPORDEFECTO = 4 * 60 * 60 * 1000;//cada 4 horas
+
         ListaUnica<ClienteServidorHttpSeguro> clientes;
         System.Timers.Timer tmpResetIntentos;
         System.Threading.Semaphore smpResetIntentos;
@@ -189,7 +190,7 @@ namespace Gabriel.Cat.Xarxa
             respuestaString = datosRespuesta.Result;
             if (System.Diagnostics.Debugger.IsAttached)
             {
-                Console.WriteLine("La respuesta de la web '{0}'", respuestaString);
+                Console.WriteLine("La respuesta de la web '{0}' para la ip {1}", respuestaString,ipAComprobar);
             }
             return respuestaString.Contains(USAPROXYETC);
         }
