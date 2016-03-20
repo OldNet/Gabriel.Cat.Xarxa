@@ -14,7 +14,7 @@ namespace Gabriel.Cat.Xarxa
 
         System.Net.HttpListener listener;
         Tiket<Object> tiketListener;
-        public long IdServidor { get; private set; }
+        
 
         public event ServidorHttpEventHanlder NuevaConexion;
 
@@ -32,6 +32,7 @@ namespace Gabriel.Cat.Xarxa
                 for (int i = 0; i < prefixes.Length; i++)
                     Prefixes.Add(prefixes[i]);
         }
+        public long IdServidor { get; private set; }
         public HttpListenerPrefixCollection Prefixes
         {
             get { return listener.Prefixes; }
