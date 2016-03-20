@@ -39,11 +39,13 @@ namespace Gabriel.Cat.Xarxa
             if (!listener.IsListening)
             {
                 listener.Start();
+              
                 tiketListener = new Tiket<object>((o) =>
                 {
                     while (true)
                     {
                         NuevaConexion(this, listener.GetContext()); 
+           
                     }
                 }, null);
                 tiketListener.AñadirPool();

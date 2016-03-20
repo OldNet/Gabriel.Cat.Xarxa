@@ -18,26 +18,29 @@ namespace Gabriel.Cat.Xarxa
         System.Timers.Timer tmpResetIntentos;
         System.Threading.Semaphore smpResetIntentos;
         int maxIntentosCliente;
+       
         public event ClienteSeguroEventHandler ClienteNoSeguro;
         public event ClienteSeguroEventHandler ClienteSeguro;
         #region Constructores
-        public ServidorHttpSeguro(double tiempoRenovarIntentosIp, int maxIntentosCliente)
+        public ServidorHttpSeguro(double tiempoRenovarIntentosIp, int maxIntentosCliente, params string[] prefixes) : base(prefixes)
         {
+            MaxIntentosCliente = maxIntentosCliente;
             clientes = new ListaUnica<ClienteServidorHttpSeguro>();
             tmpResetIntentos = new System.Timers.Timer();
             tmpResetIntentos.Elapsed += ResetIntentos;
             TiempoRenovarIntentosIp = tiempoRenovarIntentosIp;
             smpResetIntentos = new System.Threading.Semaphore(1, 1);
             NuevaConexion += ControlarAcceso;
-            if(StartTemporizadorResetIntenentosPorDefecto)
-               tmpResetIntentos.Start();
+            if (StartTemporizadorResetIntenentosPorDefecto)
+                tmpResetIntentos.Start();
+
 
         }
-        public ServidorHttpSeguro(double tiempoRenovarIntentosIp) : this(tiempoRenovarIntentosIp, MAXINTENTOSPORDEFECTO)
+        public ServidorHttpSeguro(double tiempoRenovarIntentosIp, params string[] prefixes) : this(tiempoRenovarIntentosIp, MAXINTENTOSPORDEFECTO, prefixes)
         { }
-        public ServidorHttpSeguro(int maxIntentosCliente) : this(TIEMPORENOVARINTENTOSIPPORDEFECTO, maxIntentosCliente)
+        public ServidorHttpSeguro(int maxIntentosCliente, params string[] prefixes) : this(TIEMPORENOVARINTENTOSIPPORDEFECTO, maxIntentosCliente, prefixes)
         { }
-        public ServidorHttpSeguro() : this(TIEMPORENOVARINTENTOSIPPORDEFECTO)
+        public ServidorHttpSeguro(params string[] prefixes) : this(TIEMPORENOVARINTENTOSIPPORDEFECTO, prefixes)
         { }
         #endregion
         #region Propiedades
@@ -62,7 +65,7 @@ namespace Gabriel.Cat.Xarxa
         #endregion
         public void StartTemporizadorRenovarIp()
         {
-            if(!tmpResetIntentos.Enabled)
+            if (!tmpResetIntentos.Enabled)
             {
                 smpResetIntentos.WaitOne();
                 tmpResetIntentos.Start();
@@ -81,47 +84,70 @@ namespace Gabriel.Cat.Xarxa
         private void ControlarAcceso(ServidorHttp servidor, HttpListenerContext conexionNueva)
         {
             ClienteServidorHttpSeguro cliente;
-            IComparable keyClient = conexionNueva.Request.LocalEndPoint.Address.ToString();
+            IComparable keyClient = conexionNueva.Request.RemoteEndPoint.Address.ToString();
             bool existe = clientes.ExisteClave(keyClient);
-            if (!existe||existe && !clientes[keyClient].Bloqueado)
+            if (!ClienteUsaProxyEtc(conexionNueva))
             {
-                try
+                if (!existe || existe && !clientes[keyClient].Bloqueado)
                 {
-                    if(tmpResetIntentos.Enabled)
-                        smpResetIntentos.WaitOne();//hace que vayan uno a uno...quizas pierde rendimiento
-                    if (!clientes.ExisteClave(keyClient))
+                    try
                     {
-                        cliente = new ClienteServidorHttpSeguro(conexionNueva);
-                        clientes.Añadir(cliente);
+                        if (tmpResetIntentos.Enabled)
+                            smpResetIntentos.WaitOne();//hace que vayan uno a uno...quizas pierde rendimiento
+                        if (!clientes.ExisteClave(keyClient))
+                        {
+                            cliente = new ClienteServidorHttpSeguro(conexionNueva);
+                            clientes.Añadir(cliente);
+                        }
+                        else
+                        {
+                            cliente = clientes[keyClient];
+                            cliente.Client = conexionNueva;//es una nueva conexion :)
+                        }
+                        cliente.AñadirConexion();
+                        if (cliente.Conexiones >= maxIntentosCliente && ClienteNoSeguro != null)
+                            ClienteNoSeguro(cliente);
+                        else if (ClienteSeguro != null)
+                            ClienteSeguro(cliente);
+                        cliente.Client.Response.OutputStream.Flush();
+                        conexionNueva.Response.Close();//si la cierro para los que estan bloqueados luego pueden volver a enviar (al menos los relentizo) asi que solo la cierro para los que son validos :)
                     }
-                    else
+                    catch (Exception excepcion) { throw excepcion; }//si hay algun problema lanzo la excepcion
+                    finally
                     {
-                        cliente = clientes[keyClient];
+                        if (tmpResetIntentos.Enabled)
+                            smpResetIntentos.Release();
                     }
-                    cliente.AñadadirConexion();
-                    if (cliente.Conexiones > maxIntentosCliente && ClienteNoSeguro != null)
-                        ClienteNoSeguro(cliente);
-                    else if (ClienteSeguro != null)
-                        ClienteSeguro(cliente);
-                }
-                catch (Exception excepcion){ throw excepcion; }//si hay algun problema lanzo la excepcion
-                finally
-                {
-                    if (tmpResetIntentos.Enabled)
-                        smpResetIntentos.Release();
                 }
             }
+              
+        }
+
+        private bool ClienteUsaProxyEtc(HttpListenerContext conexionNueva)
+        {
+            const char USAPROXYETC = '1';
+            string pathWebConIp = "http://check.getipintel.net/check.php?ip=" + conexionNueva.Request.RemoteEndPoint.Address.ToString();
+            Console.WriteLine(pathWebConIp);
+            System.Net.Http.HttpClient cliente = new System.Net.Http.HttpClient();
+            Task<System.Net.Http.HttpResponseMessage> respuesta= cliente.GetAsync(pathWebConIp);
+            Task<string> datosRespuesta;
+            string respuestaString;
+            respuesta.Wait();
+            datosRespuesta= respuesta.Result.Content.ReadAsStringAsync();//metodo para mirarlo online :)
+            datosRespuesta.Wait();
+            respuestaString= datosRespuesta.Result;
+            Console.WriteLine(respuestaString);
+            return respuestaString.Contains(USAPROXYETC);
         }
 
         private void ResetIntentos(object sender, ElapsedEventArgs e)
         {
             smpResetIntentos.WaitOne();
-            for (int i = 0; i < clientes.Count; i++)
-                clientes[i].ResetConexiones();
+            clientes.Vaciar();//como cada peticion es una conexion nueva,para no guardar muchos clientes que ya se les habra cambiado la ip pues  vacio la lista :)
             smpResetIntentos.Release();
         }
     }
-    public struct ClienteServidorHttpSeguro : IComparable<ClienteServidorHttpSeguro>, IComparable, IClauUnicaPerObjecte
+    public class ClienteServidorHttpSeguro : IComparable<ClienteServidorHttpSeguro>, IComparable, IClauUnicaPerObjecte
     {
         HttpListenerContext client;
         int conexiones;
@@ -141,7 +167,12 @@ namespace Gabriel.Cat.Xarxa
             {
                 return client;
             }
-
+            set
+            {
+                if (value == null)
+                    throw new NullReferenceException();
+                client = value;
+            }
         }
 
         public int Conexiones
@@ -171,16 +202,17 @@ namespace Gabriel.Cat.Xarxa
         }
         public string DireccionIP
         {
-            get { return client.Request.LocalEndPoint.Address.ToString(); }
+            get { return client.Request.RemoteEndPoint.Address.ToString(); }
         }
         public void ResetConexiones()
         {
             Conexiones = 0;
         }
-        public void AñadadirConexion()
+        public void AñadirConexion()
         {
             Conexiones++;
         }
+
         public int CompareTo(ClienteServidorHttpSeguro other)
         {
             return Clau().CompareTo(other.Clau());
