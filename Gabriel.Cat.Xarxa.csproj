@@ -85,6 +85,7 @@
     <Compile Include="PartPublica\StringJson.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServidorHttp.cs" />
+    <Compile Include="ServidorHttpSeguro.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
