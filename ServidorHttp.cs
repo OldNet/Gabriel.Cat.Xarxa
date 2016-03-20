@@ -12,6 +12,8 @@ namespace Gabriel.Cat.Xarxa
     {
         System.Net.HttpListener listener;
         Tiket<Object> tiketListener;
+        public long IdServidor { get; private set; }
+
         public event ServidorHttpEventHanlder NuevaConexion;
 
         public ServidorHttp()
@@ -20,6 +22,7 @@ namespace Gabriel.Cat.Xarxa
                 throw new NotSupportedException(
                     "Needs Windows XP SP2, Server 2003 or later.");
             listener = new System.Net.HttpListener();
+            IdServidor = DateTime.Now.Ticks;
         }
         public ServidorHttp(params string[] prefixes):this()
         {
@@ -35,11 +38,12 @@ namespace Gabriel.Cat.Xarxa
         {
             if (NuevaConexion == null)
                 throw new Exception("No hay quien coja las nuevas conexiones");
+
             //si no hay prefix habra una excepcion
             if (!listener.IsListening)
             {
-                listener.Start();
-              
+
+                listener.Start(); 
                 tiketListener = new Tiket<object>((o) =>
                 {
                     while (true)
@@ -49,18 +53,29 @@ namespace Gabriel.Cat.Xarxa
                     }
                 }, null);
                 tiketListener.AñadirPool();
+                if (System.Diagnostics.Debugger.IsAttached)
+                {
+                    Console.WriteLine("El servidor id='{0}' esta encendido", IdServidor);
+                }
             }
         }
         public void Stop()
         {
             if (tiketListener != null)
             {
+
                 listener.Stop();
                 listener.Close();
                 tiketListener.AbortaTrabajo();
                 tiketListener = null;
+                if (System.Diagnostics.Debugger.IsAttached)
+                {
+                    Console.WriteLine("El servidor id='{0}' esta parado", IdServidor);
+                }
             }
         }
+
+        
     }
 
 

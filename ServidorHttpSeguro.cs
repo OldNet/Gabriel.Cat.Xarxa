@@ -167,7 +167,7 @@ namespace Gabriel.Cat.Xarxa
 
         }
         /// <summary>
-        /// Valida la Ip
+        /// Valida la Ip que no use Proxy u otro medio no directo (para prevenir ataques masivos)
         /// </summary>
         /// <param name="conexionNueva"></param>
         /// <returns></returns>
