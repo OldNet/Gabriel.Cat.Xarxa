@@ -15,6 +15,7 @@ namespace Gabriel.Cat.Xarxa
         const int MAXINTENTOSPORDEFECTO = 1000;
         const double TIEMPORENOVARINTENTOSIPPORDEFECTO = 4 * 60 * 60 * 1000;//cada 4 horas
 
+        ServicioValidacionIP ServicioValidacionIP { get; set; }
         ListaUnica<ClienteServidorHttpSeguro> clientes;
         System.Timers.Timer tmpResetIntentos;
         System.Threading.Semaphore smpResetIntentos;
@@ -95,7 +96,7 @@ namespace Gabriel.Cat.Xarxa
             {
                 Console.WriteLine("Hay una nueva conexion de la ip {0}", ipCliente);
             }
-            if (existe && !clientes[ipCliente].Bloqueado || !existe && !ClienteUsaProxyEtc(ipCliente))//valido aqui que no este bloqueado para no tener que comprobar su ip en vano :)
+            if (existe && !clientes[ipCliente].Bloqueado || !existe && (ServicioValidacionIP==null||ServicioValidacionIP.ValidaIp(ipCliente)))//valido aqui que no este bloqueado para no tener que comprobar su ip en vano :)
             {
                 if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
                 {

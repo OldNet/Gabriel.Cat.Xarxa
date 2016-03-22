@@ -89,6 +89,7 @@
     <Compile Include="ValidarIPs\ServiciosValidacionIP.cs" />
     <Compile Include="ServidorHttp.cs" />
     <Compile Include="ServidorHttpSeguro.cs" />
+    <Compile Include="ValidarIPs\ValidadorIPList.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
