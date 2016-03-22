@@ -15,7 +15,7 @@ namespace Gabriel.Cat.Xarxa
         const int MAXINTENTOSPORDEFECTO = 1000;
         const double TIEMPORENOVARINTENTOSIPPORDEFECTO = 4 * 60 * 60 * 1000;//cada 4 horas
 
-        ServicioValidacionIP ServicioValidacionIP { get; set; }
+        public  ServicioValidacionIP ServicioValidacionIP { get; set; }
         ListaUnica<ClienteServidorHttpSeguro> clientes;
         System.Timers.Timer tmpResetIntentos;
         System.Threading.Semaphore smpResetIntentos;

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Gabriel.Cat.Xarxa.ValidarIPs
+namespace Gabriel.Cat.Xarxa
 {
     public class GetIpIntel : ServicioValidacionIP
     {

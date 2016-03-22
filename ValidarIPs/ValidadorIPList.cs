@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Gabriel.Cat.Xarxa.ValidarIPs
+namespace Gabriel.Cat.Xarxa
 {
     public class ValidadorIPList:ServicioValidacionIP
     {
@@ -13,6 +13,15 @@ namespace Gabriel.Cat.Xarxa.ValidarIPs
         public ValidadorIPList()
         { 
             servicios = new Llista<ServicioValidacionIP>();
+        }
+        public ValidadorIPList(params ServicioValidacionIP[] servicios)
+        {
+            if (servicios != null)
+            {
+                for (int i = 0; i < servicios.Length; i++)
+                    if (servicios[i] != null)
+                        Servicios.Afegir(servicios[i]);
+            }
         }
         public Llista<ServicioValidacionIP> Servicios
         { 
