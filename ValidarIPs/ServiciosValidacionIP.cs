@@ -28,7 +28,7 @@ namespace Gabriel.Cat.Xarxa
         {
             return TimeSpan.MaxValue;
         }
-        protected void MostrarProblema(string excepcion)
+        protected void LanzarMensaje(string excepcion)
         {
             if (LanzarExcepcionSiNoHayServicioDisponible)
             {
@@ -39,9 +39,9 @@ namespace Gabriel.Cat.Xarxa
                 Console.WriteLine(excepcion);
             }
         }
-        protected void MostrarProblema(string excepcion, params object[] parametros)
+        protected void LanzarMensaje(string excepcion, params object[] parametros)
         {
-            MostrarProblema(string.Format(excepcion, parametros)); 
+            LanzarMensaje(string.Format(excepcion, parametros)); 
         }
         #region Miembros de IComparable
 

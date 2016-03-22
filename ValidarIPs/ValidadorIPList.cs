@@ -74,14 +74,14 @@ namespace Gabriel.Cat.Xarxa
 
             if (servicios.Count == 0)
             {
-                    MostrarProblema( "No hay servicios disponibles");  
+                    LanzarMensaje( "No hay servicios disponibles");  
             }
             else
             {
                 servicios.Ordena();
                 if (!servicios[0].EstaElServicioOperativo())
                 {
-                    MostrarProblema("No hay servicios operativos");  
+                    LanzarMensaje("No hay servicios operativos");  
                 }
                 else
                 {
