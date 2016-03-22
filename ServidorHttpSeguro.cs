@@ -134,6 +134,7 @@ namespace Gabriel.Cat.Xarxa
                         }
                         if (ClienteNoSeguro != null)
                             ClienteNoSeguro(cliente);
+                        cliente.Bloqueado = true;
                     }
                     else if (ClienteSeguro != null)
                     {
@@ -174,12 +175,13 @@ namespace Gabriel.Cat.Xarxa
 
         private void ResetIntentos(object sender, ElapsedEventArgs e)
         {
+            ClienteServidorHttpSeguro[] clientes;
             smpResetIntentos.WaitOne();
-            if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
-            {
-                Console.WriteLine("Vacio la lista de clientes");
-            }
-            clientes.Vaciar();//como cada peticion es una conexion nueva,para no guardar muchos clientes que ya se les habra cambiado la ip pues  vacio la lista :)
+            clientes = this.clientes.ToArray();
+            for (int i = 0; i < clientes.Length; i++)
+                if (!clientes[i].Bloqueado||clientes[i].Conexiones>=maxIntentosCliente)//los que se han excedido de intentos los desbaneo los otros se quedan por presunto ataque hacker ;)
+                    this.clientes.Elimina(clientes[i]);
+
             smpResetIntentos.Release();
         }
     }

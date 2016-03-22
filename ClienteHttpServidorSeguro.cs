@@ -67,6 +67,7 @@ namespace Gabriel.Cat.Xarxa
         public void ResetConexiones()
         {
             Conexiones = 0;
+            
         }
         public void AñadirConexion()
         {
