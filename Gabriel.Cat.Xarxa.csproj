@@ -85,7 +85,7 @@
     <Compile Include="PartPublica\MissatgerObject.cs" />
     <Compile Include="PartPublica\StringJson.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ValidarIPs\GetIpIntel.cs" />
+    <Compile Include="ValidarIPs\GetIpIntelServicioValidacionIP.cs" />
     <Compile Include="ValidarIPs\ServiciosValidacionIP.cs" />
     <Compile Include="ServidorHttp.cs" />
     <Compile Include="ServidorHttpSeguro.cs" />
