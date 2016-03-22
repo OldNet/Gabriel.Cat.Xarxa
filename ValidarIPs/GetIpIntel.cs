@@ -114,5 +114,5 @@ namespace Gabriel.Cat.Xarxa
             return true;
         }
     }
-    //https://github.com/blackdotsh/getIPIntel mirar el proyecto por si tiene version local :) hacer clase para adaptar el servicio :)
+
 }
