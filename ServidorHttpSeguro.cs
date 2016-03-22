@@ -180,7 +180,7 @@ namespace Gabriel.Cat.Xarxa
             clientes = this.clientes.ToArray();
             for (int i = 0; i < clientes.Length; i++)
                 if (!clientes[i].Bloqueado||clientes[i].Conexiones>=maxIntentosCliente)//los que se han excedido de intentos los desbaneo los otros se quedan por presunto ataque hacker ;)
-                    this.clientes.Elimina(clientes[i]);
+                    this.clientes.Elimina(clientes[i]);//los elimino porque la clave ip se va renovando asi que habrian al final muchas ips no usadas nunca...y supondria un problema :)
 
             smpResetIntentos.Release();
         }
