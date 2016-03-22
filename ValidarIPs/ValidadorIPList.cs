@@ -8,7 +8,7 @@ namespace Gabriel.Cat.Xarxa
 {
     public class ValidadorIPList:ServicioValidacionIP
     {
-        public static bool LanzarExcepcionSiNoHayServicioDisponible = false;
+
         Llista<ServicioValidacionIP> servicios;
         public ValidadorIPList()
         { 
@@ -71,18 +71,17 @@ namespace Gabriel.Cat.Xarxa
         private bool HayServicioOperativo()
         {
             bool hayServicio = false;
+
             if (servicios.Count == 0)
             {
-                if (LanzarExcepcionSiNoHayServicioDisponible)
-                    throw new Exception("No hay servicios disponibles");
+                    MostrarProblema( "No hay servicios disponibles");  
             }
             else
             {
                 servicios.Ordena();
                 if (!servicios[0].EstaElServicioOperativo())
                 {
-                    if (LanzarExcepcionSiNoHayServicioDisponible)
-                        throw new Exception("No hay servicios disponibles");
+                    MostrarProblema("No hay servicios operativos");  
                 }
                 else
                 {
@@ -91,5 +90,7 @@ namespace Gabriel.Cat.Xarxa
             }
             return hayServicio;
         }
+
+
     }
 }
