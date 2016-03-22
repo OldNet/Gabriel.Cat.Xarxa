@@ -8,6 +8,7 @@ namespace Gabriel.Cat.Xarxa
 {
     public abstract class ServicioValidacionIP : IComparable, IComparable<ServicioValidacionIP>
     {
+        //los pongo para la herencia :)
         public static bool ShowDebbugMessages = true;
         public static bool LanzarExcepcionSiNoHayServicioDisponible = false;
         /// <summary>

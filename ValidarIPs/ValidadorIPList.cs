@@ -14,7 +14,7 @@ namespace Gabriel.Cat.Xarxa
         { 
             servicios = new Llista<ServicioValidacionIP>();
         }
-        public ValidadorIPList(params ServicioValidacionIP[] servicios)
+        public ValidadorIPList(params ServicioValidacionIP[] servicios):this()
         {
             if (servicios != null)
             {
