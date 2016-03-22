@@ -169,34 +169,7 @@ namespace Gabriel.Cat.Xarxa
 
 
         }
-        /// <summary>
-        /// Valida la Ip que no use Proxy u otro medio no directo (para prevenir ataques masivos)
-        /// </summary>
-        /// <param name="conexionNueva"></param>
-        /// <returns></returns>
-        protected virtual bool ClienteUsaProxyEtc(string ipAComprobar)//lo hago virtual para que los que hereden puedan cambiar de sitio web :)
-        {
-            //esta web mira proxy,vpn,red TOR y bad ip detection
-            const char USAPROXYETC = '1';
-            string pathWebConIp = "http://check.getipintel.net/check.php?ip=" + ipAComprobar;
-            if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
-            {
-                Console.WriteLine("Se usara la web '{0}' para validar la ip", pathWebConIp);
-            }
-            System.Net.Http.HttpClient cliente = new System.Net.Http.HttpClient();
-            Task<System.Net.Http.HttpResponseMessage> respuesta = cliente.GetAsync(pathWebConIp);
-            Task<string> datosRespuesta;
-            string respuestaString;
-            respuesta.Wait();
-            datosRespuesta = respuesta.Result.Content.ReadAsStringAsync();//metodo para mirarlo online :)
-            datosRespuesta.Wait();
-            respuestaString = datosRespuesta.Result;
-            if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
-            {
-                Console.WriteLine("La respuesta de la web '{0}' para la ip {1}", respuestaString, ipAComprobar);
-            }
-            return respuestaString.Contains(USAPROXYETC);
-        }
+
 
         private void ResetIntentos(object sender, ElapsedEventArgs e)
         {
