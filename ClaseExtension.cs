@@ -30,5 +30,17 @@ namespace Gabriel.Cat.Extension
             }
 
         }
+
+        public static string GetHttpValueArgument(this Uri url, string nameArg)
+        {
+            string[] campos = url.ToString().Split('?');
+            string argumentoConValor = "=";
+            for (int i = 1; i < campos.Length&&argumentoConValor=="="; i++)
+            {
+                if (campos[i].Contains(nameArg + "="))
+                    argumentoConValor = campos[i];
+            }
+            return argumentoConValor.Split('=')[1];
+        }
     }
 }
