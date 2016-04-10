@@ -83,14 +83,9 @@ namespace Gabriel.Cat.Xarxa
     public class GetIpIntelServicioValidacionIP : ServicioValidacionIP
     {
         public bool ServicioAFondo { get; set; }
-        public override bool EstaElServicioOperativo()
-        {
-            return true;
-        }
         public override bool ValidaIp(string ipAComprobar)
         {
             bool valido;
-
             //esta web mira proxy,vpn,red TOR y bad ip detection
             const char NOUSAPROXYETC = '1';
             string servicioHaFondo = ServicioAFondo ? "&flags=f" : "";
@@ -100,6 +95,7 @@ namespace Gabriel.Cat.Xarxa
             Task<System.Net.Http.HttpResponseMessage> respuesta = cliente.GetAsync(pathWebConIp);
             Task<string> datosRespuesta;
             string respuestaString;
+
             respuesta.Wait();
             datosRespuesta = respuesta.Result.Content.ReadAsStringAsync();//metodo para mirarlo online :)
             datosRespuesta.Wait();
