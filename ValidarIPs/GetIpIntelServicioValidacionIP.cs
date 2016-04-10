@@ -9,7 +9,7 @@ namespace Gabriel.Cat.Xarxa
     /// <summary>
     /// Servicio free de www.getipintel.net se hacen como maximo 495 queris por dia y 15 por minuto :) si no tiene por defecto es false
     /// </summary>
-    public class GetIpIntelServicioFreeValidacionIP : ServicioValidacionIP
+    public class GetIpIntelServicioFreeValidacionIP : GetIpIntelServicioValidacionIP
     {
         /*
          * Free Service
@@ -28,13 +28,12 @@ namespace Gabriel.Cat.Xarxa
         /// <summary>
         /// Fuerza a inspecionar la ip a fondo puede tardar 5 segundos el servicio
         /// </summary>
-        
+
         public bool SinServicioFreeDisponible { get; set; }
-        public bool ServicioAFondo { get; set; }
-        const int MAXQUERISPERDAY=33*MAXQUERIPERMINUTE;//es para no pasarme de las queris :) 495
+        const int MAXQUERISPERDAY = 33 * MAXQUERIPERMINUTE;//es para no pasarme de las queris :) 495
         const int MAXQUERIPERMINUTE = 15;
-        protected  System.Timers.Timer tmpRenovarQuerisMinute;
-        protected  System.Timers.Timer tmpRenovarQuerisPerDay;
+        protected System.Timers.Timer tmpRenovarQuerisMinute;
+        protected System.Timers.Timer tmpRenovarQuerisPerDay;
         int numeroDeSolicitudesRestantes;
         int numeroSolicitudesTotalesHechas;//se renueva cada dia
         public GetIpIntelServicioFreeValidacionIP()
@@ -45,73 +44,76 @@ namespace Gabriel.Cat.Xarxa
             numeroSolicitudesTotalesHechas = 0;
             tmpRenovarQuerisMinute = new System.Timers.Timer();
             tmpRenovarQuerisMinute.Interval = 60 * 1000;
-            tmpRenovarQuerisMinute.Elapsed += (s, arg) => {
+            tmpRenovarQuerisMinute.Elapsed += (s, arg) =>
+            {
                 if (numeroSolicitudesTotalesHechas != MAXQUERISPERDAY)
                     numeroDeSolicitudesRestantes = MAXQUERIPERMINUTE;
                 else
                     tmpRenovarQuerisMinute.Enabled = false;
             };
             tmpRenovarQuerisPerDay = new System.Timers.Timer();
-            tmpRenovarQuerisPerDay.Interval = 24*60*60* 1000;
-            tmpRenovarQuerisPerDay.Elapsed += (s, arg) => {
+            tmpRenovarQuerisPerDay.Interval = 24 * 60 * 60 * 1000;
+            tmpRenovarQuerisPerDay.Elapsed += (s, arg) =>
+            {
                 tmpRenovarQuerisMinute.Enabled = true;
                 numeroDeSolicitudesRestantes = MAXQUERIPERMINUTE;
-                numeroSolicitudesTotalesHechas = 0; };
+                numeroSolicitudesTotalesHechas = 0;
+            };
             tmpRenovarQuerisMinute.Start();
             tmpRenovarQuerisPerDay.Start();
         }
-        
-        public override bool ValidaIp(string ipAComprobar)
-        {
-            bool valido = SinServicioFreeDisponible;
-            if (EstaElServicioOperativo())
-            {
-                numeroSolicitudesTotalesHechas++;
-                numeroDeSolicitudesRestantes--;
-                //esta web mira proxy,vpn,red TOR y bad ip detection
-                const char NOUSAPROXYETC = '1';
-                string servicioHaFondo = ServicioAFondo ? "&flags=f" : "";
-                string pathWebConIp = "http://check.getipintel.net/check.php?ip=" + ipAComprobar + servicioHaFondo;
-                LanzarMensaje("Se usara la web '{0}' para validar la ip", pathWebConIp);
-                System.Net.Http.HttpClient cliente = new System.Net.Http.HttpClient();
-                Task<System.Net.Http.HttpResponseMessage> respuesta = cliente.GetAsync(pathWebConIp);
-                Task<string> datosRespuesta;
-                string respuestaString;
-                respuesta.Wait();
-                datosRespuesta = respuesta.Result.Content.ReadAsStringAsync();//metodo para mirarlo online :)
-                datosRespuesta.Wait();
-                respuestaString = datosRespuesta.Result;
-                LanzarMensaje("La respuesta de la web '{0}' para la ip {1}", respuestaString, ipAComprobar);
-                valido= respuestaString.Contains(NOUSAPROXYETC);
 
-            }
-            return valido;
-        }
         public override bool EstaElServicioOperativo()
         {
-            return numeroDeSolicitudesRestantes!=0&&numeroSolicitudesTotalesHechas<MAXQUERISPERDAY;
+            return numeroDeSolicitudesRestantes != 0 && numeroSolicitudesTotalesHechas < MAXQUERISPERDAY;
+        }
+        public override bool ValidaIp(string ipAComprobar)
+        {
+            bool valido = false;
+            if (EstaElServicioOperativo())
+                valido = base.ValidaIp(ipAComprobar);
+            return valido;
         }
 
-        public override TimeSpan TiempoUsoServicio()
-        {
-            return new TimeSpan(24, 0, 0);
-        }
     }
 
     /// <summary>
     /// Si el servicio de www.getipintel.net se paga diria que no tiene limites :)
     /// </summary>
-    public class GetIpIntelServicioValidacionIP:GetIpIntelServicioFreeValidacionIP
+    public class GetIpIntelServicioValidacionIP : ServicioValidacionIP
     {
-        public GetIpIntelServicioValidacionIP()
-            : base()
-        {
-            tmpRenovarQuerisMinute.Enabled = false;
-            tmpRenovarQuerisPerDay.Enabled = false;
-        }
+        public bool ServicioAFondo { get; set; }
         public override bool EstaElServicioOperativo()
         {
             return true;
+        }
+        public override bool ValidaIp(string ipAComprobar)
+        {
+            bool valido;
+
+            //esta web mira proxy,vpn,red TOR y bad ip detection
+            const char NOUSAPROXYETC = '1';
+            string servicioHaFondo = ServicioAFondo ? "&flags=f" : "";
+            string pathWebConIp = "http://check.getipintel.net/check.php?ip=" + ipAComprobar + servicioHaFondo;
+            LanzarMensaje("Se usara la web '{0}' para validar la ip", pathWebConIp);
+            System.Net.Http.HttpClient cliente = new System.Net.Http.HttpClient();
+            Task<System.Net.Http.HttpResponseMessage> respuesta = cliente.GetAsync(pathWebConIp);
+            Task<string> datosRespuesta;
+            string respuestaString;
+            respuesta.Wait();
+            datosRespuesta = respuesta.Result.Content.ReadAsStringAsync();//metodo para mirarlo online :)
+            datosRespuesta.Wait();
+            respuestaString = datosRespuesta.Result;
+            LanzarMensaje("La respuesta de la web '{0}' para la ip {1}", respuestaString, ipAComprobar);
+            valido = respuestaString.Contains(NOUSAPROXYETC);
+
+
+            return valido;
+        }
+
+        public override TimeSpan TiempoUsoServicio()
+        {
+            return new TimeSpan(24, 0, 0);
         }
     }
 
