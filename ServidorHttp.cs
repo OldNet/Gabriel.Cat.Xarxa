@@ -24,6 +24,7 @@ namespace Gabriel.Cat.Xarxa
                 throw new NotSupportedException("Needs Windows XP SP2, Server 2003 or later.");
             listener = new System.Net.HttpListener();
             IdServidor = DateTime.Now.Ticks;
+
         }
         public ServidorHttp(params string[] prefixes):this()
         {

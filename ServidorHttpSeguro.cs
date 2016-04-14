@@ -150,7 +150,7 @@ namespace Gabriel.Cat.Xarxa
                 }
                 catch (Exception excepcion) { throw excepcion; }//si hay algun problema lanzo la excepcion
                 finally
-                {
+                { 
                     if (tmpResetIntentos.Enabled)
                         smpResetIntentos.Release();
                 }
