@@ -12,6 +12,7 @@ namespace Gabriel.Cat.Xarxa
         HttpListenerContext client;
         int conexiones;
         bool bloqueado;
+        object tag;
         public ClienteServidorHttpSeguro(HttpListenerContext client)
         {
             if (client == null)
@@ -63,6 +64,14 @@ namespace Gabriel.Cat.Xarxa
         public string DireccionIP
         {
             get { return client.Request.RemoteEndPoint.Address.ToString(); }
+        }
+        public object Tag {
+            get {
+                return tag;
+            }
+            set {
+                tag = value; 
+            } 
         }
         public void ResetConexiones()
         {
