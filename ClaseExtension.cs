@@ -45,5 +45,6 @@ namespace Gabriel.Cat.Extension
 			return postData;
 			
 		}
+		//hacer metodo que de el resultado anterior KeyValuPair<IdCampo,Valor>[] asi es mas comodo
 	}
 }
