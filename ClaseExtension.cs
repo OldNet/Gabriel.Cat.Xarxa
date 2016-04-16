@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-
+using Gabriel.Cat;
 namespace Gabriel.Cat.Extension
 {
 	public static class ClaseExtensionXarxa
@@ -45,6 +45,14 @@ namespace Gabriel.Cat.Extension
 			return postData;
 			
 		}
-		//hacer metodo que de el resultado anterior KeyValuPair<IdCampo,Valor>[] asi es mas comodo
+		//hacer metodo que de el resultado anterior en un diccionario<idCampo,valor>
+		public static LlistaOrdenada<string,string> PostDataDiccionary(this HttpListenerRequest request)
+		{
+		
+			string postData=request.PostData();
+			LlistaOrdenada<string,string> diccionari=new LlistaOrdenada<string, string>();
+			//poso les dades
+			return diccionari;
+		}
 	}
 }
