@@ -132,9 +132,10 @@ namespace Gabriel.Cat.Xarxa
                         {
                             Console.WriteLine("\tLa ip {0} supera las conexiones de un cliente normal", ipCliente, cliente.Conexiones);
                         }
+                        cliente.Bloqueado = true;//lo bloqueo antes porque luego se puede quitar el ban
                         if (ClienteNoSeguro != null)
                             ClienteNoSeguro(cliente);
-                        cliente.Bloqueado = true;
+                       
                     }
                     else if (ClienteSeguro != null)
                     {
