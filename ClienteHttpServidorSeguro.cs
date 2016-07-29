@@ -13,13 +13,18 @@ namespace Gabriel.Cat.Xarxa
         int conexiones;
         bool bloqueado;
         object tag;
+        public SesionUsuario DatosSesionUsuario { get; private set; }
+        public string IdConexionCliente { get; private set; }
         public ClienteServidorHttpSeguro(HttpListenerContext client)
         {
             if (client == null)
                 throw new NullReferenceException();
+            DatosSesionUsuario = new SesionUsuario();
             this.client = client;
             this.conexiones = 1;
             bloqueado = false;
+            IdConexionCliente=client.Request.GetClientCertificate().SerialNumber;// sera diferente en cada pc??? y en cada navegador??? puede ser una manera de identificarlos no?? y tienen que usar porque es https asi que tienen que tenerlo :)
+            //falta saber si es unico :)
         }
 
         public HttpListenerContext Client
@@ -33,6 +38,7 @@ namespace Gabriel.Cat.Xarxa
                 if (value == null)
                     throw new NullReferenceException();
                 client = value;
+                IdConexionCliente = client.Request.GetClientCertificate().SerialNumber;//actualizo el serial
             }
         }
 
@@ -85,27 +91,22 @@ namespace Gabriel.Cat.Xarxa
 
         public int CompareTo(ClienteServidorHttpSeguro other)
         {
-            return Clau().CompareTo(other.Clau());
+            int compareTo;
+
+            if (other != null) compareTo = Clau().CompareTo(other.Clau());
+            else compareTo = -1;
+            return compareTo;
         }
 
         public int CompareTo(object obj)
         {
-            int compareTo;
-            if (obj is ClienteServidorHttpSeguro)
-            {
-                compareTo = CompareTo((ClienteServidorHttpSeguro)obj);
-            }
-            else
-            {
-                compareTo = -1;
-            }
-            return compareTo;
+            return CompareTo(obj as ClienteServidorHttpSeguro);
 
         }
 
         public IComparable Clau()
         {
-            return DireccionIP;
+            return DireccionIP+IdConexionCliente;
         }
     }
 }
