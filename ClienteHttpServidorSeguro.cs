@@ -41,7 +41,10 @@ namespace Gabriel.Cat.Xarxa
                 IdConexionCliente = client.Request.GetClientCertificate().SerialNumber;//actualizo el serial
             }
         }
-
+        public string IdUnicoCliente
+        {
+            get {return DireccionIP + IdConexionCliente; }//la ip cambia...y el id tambien??pero cada x tiempo...como lo hago si cambia???
+        }
         public int Conexiones
         {
             get

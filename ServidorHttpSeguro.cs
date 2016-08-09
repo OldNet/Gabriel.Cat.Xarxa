@@ -91,12 +91,14 @@ namespace Gabriel.Cat.Xarxa
         {
             ClienteServidorHttpSeguro cliente;
             string ipCliente = conexionNueva.Request.RemoteEndPoint.Address.ToString();
-            bool existe = clientes.ExisteClave(ipCliente);
+            string serialClinete = conexionNueva.Request.GetClientCertificate().SerialNumber;
+            string idUnicoCliente = ipCliente + serialClinete;
+            bool existe = clientes.ExisteClave(ipCliente+serialClinete);
             if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
             {
-                Console.WriteLine("Hay una nueva conexion de la ip {0}", ipCliente);
+                Console.WriteLine("Hay una nueva conexion de la ip {0} y serial {1} ",ipCliente,serialClinete);
             }
-            if (existe && !clientes[ipCliente].Bloqueado || !existe && (ServicioValidacionIP == null ||  ServicioValidacionIP.ValidaIp(ipCliente)))//valido aqui que no este bloqueado para no tener que comprobar su ip en vano :)
+            if (existe && !clientes[idUnicoCliente].Bloqueado || !existe && (ServicioValidacionIP == null ||  ServicioValidacionIP.ValidaIp(ipCliente)))//valido aqui que no este bloqueado para no tener que comprobar su ip en vano :)
             {
                 if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
                 {
@@ -106,7 +108,7 @@ namespace Gabriel.Cat.Xarxa
                 {
                     if (tmpResetIntentos.Enabled)
                         smpResetIntentos.WaitOne();//hace que vayan uno a uno...quizas pierde rendimiento
-                    if (!clientes.ExisteClave(ipCliente))
+                    if (!clientes.ExisteClave(idUnicoCliente))
                     {
                         if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
                         {
@@ -117,7 +119,7 @@ namespace Gabriel.Cat.Xarxa
                     }
                     else
                     {
-                        cliente = clientes[ipCliente];
+                        cliente = clientes[idUnicoCliente];
                         cliente.Client = conexionNueva;//es una nueva conexion :)
                         cliente.AñadirConexion();
                         if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
@@ -130,7 +132,7 @@ namespace Gabriel.Cat.Xarxa
                     {
                         if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
                         {
-                            Console.WriteLine("\tLa ip {0} supera las conexiones de un cliente normal", ipCliente, cliente.Conexiones);
+                            Console.WriteLine("\tLa ip {0} supera las conexiones de un cliente normal", ipCliente);
                         }
                         cliente.Bloqueado = true;//lo bloqueo antes porque luego se puede quitar el ban
                         if (ClienteNoSeguro != null)
@@ -141,7 +143,7 @@ namespace Gabriel.Cat.Xarxa
                     {
                         if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
                         {
-                            Console.WriteLine("\tLa ip {0} es un cliente normal", ipCliente, cliente.Conexiones);
+                            Console.WriteLine("\tLa ip {0} es un cliente normal", ipCliente);
                         }
                         ClienteSeguro(cliente);
                     }
@@ -166,7 +168,7 @@ namespace Gabriel.Cat.Xarxa
                 {
                     clientes.Añadir(new ClienteServidorHttpSeguro(conexionNueva) { Bloqueado=true});//añado la conexion a la lista de bloqueados para evitar que se vuelva a comprobar :)
                     if (ClienteNoSeguro != null)//aviso para se sepa :)
-                        ClienteNoSeguro(clientes[ipCliente]);
+                        ClienteNoSeguro(clientes[idUnicoCliente]);
                 }
             }
 
