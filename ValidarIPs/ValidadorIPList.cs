@@ -20,7 +20,7 @@ namespace Gabriel.Cat.Xarxa
             {
                 for (int i = 0; i < servicios.Length; i++)
                     if (servicios[i] != null)
-                        Servicios.Afegir(servicios[i]);
+                        Servicios.Add(servicios[i]);
             }
         }
         public Llista<ServicioValidacionIP> Servicios
@@ -78,7 +78,7 @@ namespace Gabriel.Cat.Xarxa
             }
             else
             {
-                servicios.Ordena();
+                servicios.Sort();
                 if (!servicios[0].EstaElServicioOperativo())
                 {
                     LanzarMensaje("No hay servicios operativos");  

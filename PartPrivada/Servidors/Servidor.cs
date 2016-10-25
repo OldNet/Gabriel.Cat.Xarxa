@@ -52,16 +52,16 @@ namespace Gabriel.Cat
 		}
 		protected  void AfegirId(string id)
 		{
-			if (!ids.Existeix(id)) {
-				ids.Afegir(id, id);
+			if (!ids.ContainsKey(id)) {
+				ids.Add(id, id);
 				if (IdNova != null)
 					IdNova(id);
 			}
 		}
 		protected  void TreuId(string id)
 		{
-			if (ids.Existeix(id)) {
-				ids.Elimina(id);
+			if (ids.ContainsKey(id)) {
+				ids.Remove(id);
 				if (IdEsborrada != null)
 					IdEsborrada(id);
 			}

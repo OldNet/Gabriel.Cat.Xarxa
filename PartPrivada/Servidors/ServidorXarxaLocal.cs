@@ -136,13 +136,13 @@ namespace Gabriel.Cat
 					break;
 				case Peticions.EsClient:
 					AfegirId(missatger.AdreçaDelClient.ToString());
-					missatgersClientsConectats.Afegir(missatger.AdreçaDelClient,missatger);
+					missatgersClientsConectats.Add(missatger.AdreçaDelClient,missatger);
 					missatger.ConexioPerduda+=TreuClientEvent;
 					
 					break;
 				case Peticions.EsServidor:
 					AfegirId(missatger.AdreçaDelClient.ToString());
-					missatgersServidorsConectats.Afegir(missatger.AdreçaDelClient,missatger);
+					missatgersServidorsConectats.Add(missatger.AdreçaDelClient,missatger);
 					missatger.ConexioPerduda+=TreuServidorEvent;
 					
 					break;
@@ -158,12 +158,12 @@ namespace Gabriel.Cat
 
 		void TreuClientEvent(Gabriel.Cat.Missatger missatger)
 		{
-			missatgersClientsConectats.Elimina(missatger.AdreçaDelClient);
+			missatgersClientsConectats.Remove(missatger.AdreçaDelClient);
 		}
 
 		void TreuServidorEvent(Gabriel.Cat.Missatger missatger)
 		{
-			missatgersServidorsConectats.Elimina(missatger.AdreçaDelClient);
+			missatgersServidorsConectats.Remove(missatger.AdreçaDelClient);
 		}
 
 		public void Reb(Gabriel.Cat.Missatger missatger, byte[] dades)

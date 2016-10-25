@@ -96,7 +96,7 @@ namespace Gabriel.Cat.Xarxa
         {
             int compareTo;
 
-            if (other != null) compareTo = Clau().CompareTo(other.Clau());
+            if (other != null) compareTo = Clau.CompareTo(other.Clau);
             else compareTo = -1;
             return compareTo;
         }
@@ -107,9 +107,12 @@ namespace Gabriel.Cat.Xarxa
 
         }
 
-        public IComparable Clau()
+        public IComparable Clau
         {
-            return DireccionIP+IdConexionCliente;
+            get
+            {
+                return DireccionIP + IdConexionCliente;
+            }
         }
     }
 }

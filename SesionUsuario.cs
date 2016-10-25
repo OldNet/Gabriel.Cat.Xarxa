@@ -35,7 +35,7 @@ namespace Gabriel.Cat.Xarxa
         {
             if (!estaLimpio)//asi esta operacion tan costosa solo lo hago una vez
             {
-                DatosUsuario.Elimina(DatosUsuario.FiltraKeys((obj) => obj.ObjectData.TratarDatos == SesionDataEnum.Liberar));
+                DatosUsuario.RemoveRange(DatosUsuario.FiltraKeys((obj) => obj.ObjectData.TratarDatos == SesionDataEnum.Liberar));
                 estaLimpio = true;
                 if (TimerLimpieza.Enabled)
                     TimerLimpieza.Stop();

@@ -93,7 +93,7 @@ namespace Gabriel.Cat.Xarxa
             string ipCliente = conexionNueva.Request.RemoteEndPoint.Address.ToString();
             string serialClinete = conexionNueva.Request.GetClientCertificate().SerialNumber;
             string idUnicoCliente = ipCliente + serialClinete;
-            bool existe = clientes.ExisteClave(ipCliente+serialClinete);
+            bool existe = clientes.Contains(ipCliente+serialClinete);
             if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
             {
                 Console.WriteLine("Hay una nueva conexion de la ip {0} y serial {1} ",ipCliente,serialClinete);
@@ -108,14 +108,14 @@ namespace Gabriel.Cat.Xarxa
                 {
                     if (tmpResetIntentos.Enabled)
                         smpResetIntentos.WaitOne();//hace que vayan uno a uno...quizas pierde rendimiento
-                    if (!clientes.ExisteClave(idUnicoCliente))
+                    if (!clientes.Contains(idUnicoCliente))
                     {
                         if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
                         {
                             Console.WriteLine("\tLa ip {0} es nueva", ipCliente);
                         }
                         cliente = new ClienteServidorHttpSeguro(conexionNueva);
-                        clientes.Añadir(cliente);
+                        clientes.Add(cliente);
                     }
                     else
                     {
@@ -166,7 +166,7 @@ namespace Gabriel.Cat.Xarxa
                 }
                 if (!existe)
                 {
-                    clientes.Añadir(new ClienteServidorHttpSeguro(conexionNueva) { Bloqueado=true});//añado la conexion a la lista de bloqueados para evitar que se vuelva a comprobar :)
+                    clientes.Add(new ClienteServidorHttpSeguro(conexionNueva) { Bloqueado=true});//añado la conexion a la lista de bloqueados para evitar que se vuelva a comprobar :)
                     if (ClienteNoSeguro != null)//aviso para se sepa :)
                         ClienteNoSeguro(clientes[idUnicoCliente]);
                 }
@@ -183,7 +183,7 @@ namespace Gabriel.Cat.Xarxa
             clientes = this.clientes.ToArray();
             for (int i = 0; i < clientes.Length; i++)
                 if (!clientes[i].Bloqueado||clientes[i].Conexiones>=maxIntentosCliente)//los que se han excedido de intentos los desbaneo los otros se quedan por presunto ataque hacker ;)
-                    this.clientes.Elimina(clientes[i]);//los elimino porque la clave ip se va renovando asi que habrian al final muchas ips no usadas nunca...y supondria un problema :)
+                    this.clientes.Remove(clientes[i]);//los elimino porque la clave ip se va renovando asi que habrian al final muchas ips no usadas nunca...y supondria un problema :)
 
             smpResetIntentos.Release();
         }

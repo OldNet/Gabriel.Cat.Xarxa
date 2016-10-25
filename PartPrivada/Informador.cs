@@ -90,12 +90,12 @@ namespace Gabriel.Cat
 		void TractaClient(TcpClient socketClient)
 		{
 			Missatger missatger;
-			if (missatgers.Existeix(socketClient.Client.AddressFamily)) {
+			if (missatgers.ContainsKey(socketClient.Client.AddressFamily)) {
 				missatgers[socketClient.Client.AddressFamily].Client = socketClient;
 				missatger = missatgers[socketClient.Client.AddressFamily];
 			} else {
 				missatger = new Missatger(socketClient, this);
-				missatgers.Afegir(socketClient.Client.AddressFamily, missatger);
+				missatgers.Add(socketClient.Client.AddressFamily, missatger);
 			}
 			missatger.ConexioPerduda += TreuMissatgerLlista;
 		}
@@ -110,8 +110,8 @@ namespace Gabriel.Cat
 			string[] ip = ObetenirIpServidor().Split('.');
 			string rang = ip[0] + '.' + ip[1] + '.' + ip[2];
 			for (int i = 2; i < 255; i++)
-				ipsPerComprovar.Afegir(rang + '.' + i);
-			ipsPerComprovar.Elimina(ObetenirIpServidor());
+				ipsPerComprovar.Add(rang + '.' + i);
+			ipsPerComprovar.Remove(ObetenirIpServidor());
 			llistes = ipsPerComprovar.ToMatriu(FILESBRODADCAST);
 			for (int i = 0; i < FILESBRODADCAST; i++) {
 				fils[i] = new Thread(() => ComprovaIps(llistes, i));
@@ -131,7 +131,7 @@ namespace Gabriel.Cat
 			TcpClient client;
 			Missatger missatger;
 			for (int x = 0; x < llistes.GetLength(0) && llistes[x, y] != null; x++)
-				ips.Afegir(llistes[x, y]);
+				ips.Add(llistes[x, y]);
 			foreach (string ip in ips)//els pcs que tinguin el port obert estaran disponibles
 				try {
 				client = new TcpClient();
@@ -139,7 +139,7 @@ namespace Gabriel.Cat
 				missatger = new Missatger(client, this);
 				missatger.ConexioPerduda += TreuMissatgerBroadCastLlista;
 				missatger.Envia((StringJson)this.client.IdMissatger, (int)Peticions.IdMissatger);
-				missatgersBroadCast.Afegir(client.Client.AddressFamily, missatger);
+				missatgersBroadCast.Add(client.Client.AddressFamily, missatger);
 			} catch {
 			}
 			
@@ -148,11 +148,11 @@ namespace Gabriel.Cat
 
 		void TreuMissatgerBroadCastLlista(Missatger missatger)
 		{
-			missatgersBroadCast.Elimina(missatger.AdreçaDelClient);
+			missatgersBroadCast.Remove(missatger.AdreçaDelClient);
 		}
 		void TreuMissatgerLlista(Missatger missatger)
 		{
-			missatgers.Elimina(missatger.AdreçaDelClient);
+			missatgers.Remove(missatger.AdreçaDelClient);
 		}
 		#region IReceptor implementation
 		public void Reb(Missatger missatger, JsonObject obj, int referencia)
@@ -170,7 +170,7 @@ namespace Gabriel.Cat
 					break;
 
 				case Peticions.Ip:
-					ips.Afegir(dades.Missatge);
+					ips.Add(dades.Missatge);
 					missatger.Envia((StringJson)"", (int)Peticions.FiConnexio);//debo finalizar la conexion con el...pero cuando lo haga yo tambien...
 					break;
 				case Peticions.FiConnexio:

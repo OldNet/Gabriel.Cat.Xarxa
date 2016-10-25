@@ -173,14 +173,14 @@ public	class Missatger:IComparable
 			}
 			if (objRebut is PartPaquet) {
 				PartPaquet part = (PartPaquet)objRebut;
-				if (!paquetsEntregats.Existeix(part.IdPaquet)) {
-					if (!partsRebudes.Existeix(part.Id)) {
+				if (!paquetsEntregats.ContainsKey(part.IdPaquet)) {
+					if (!partsRebudes.ContainsKey(part.Id)) {
 			
-						partsRebudes.Afegir(part.Id, part);
+						partsRebudes.Add(part.Id, part);
 			
-						if (!paquetsIncomplets.Existeix(part.IdPaquet)) {
+						if (!paquetsIncomplets.ContainsKey(part.IdPaquet)) {
 				
-							paquetsIncomplets.Afegir(part.IdPaquet, new Paquet(part.TotalParts, part.IdPaquet));
+							paquetsIncomplets.Add(part.IdPaquet, new Paquet(part.TotalParts, part.IdPaquet));
 						
 							//vigilo que venga la carta del paquete
 							Vigila(part.IdPaquet, true, true);
@@ -197,19 +197,19 @@ public	class Missatger:IComparable
 					}
 				}
 				//si hay un vigilante para la parte dejo de vigilar que llegue
-				if (vigilantsActius.Existeix(part.Id + "falsetrue")) {
+				if (vigilantsActius.ContainsKey(part.Id + "falsetrue")) {
 		
 					vigilantsActius[part.Id + "falsetrue"].Abort();
-					vigilantsActius.Elimina(part.Id);
+					vigilantsActius.Remove(part.Id);
 				}
 				//envio que ha llegado
 				Envia(new CartaConfirmacio(part.Id, CartaConfirmacio.Tipus.partPaquet, true));//envio l'id del paquet amb el numero de la part
 				
 			} else if (objRebut is CartaPaquet) {
 				CartaPaquet carta = (CartaPaquet)objRebut;
-				if (!paquetsEntregats.Existeix(carta.IdPaquet)) {
-					if (!paquetsIncomplets.Existeix(carta.IdPaquet))
-						paquetsIncomplets.Afegir(carta.IdPaquet, new Paquet(carta.NumParts, carta.IdPaquet));
+				if (!paquetsEntregats.ContainsKey(carta.IdPaquet)) {
+					if (!paquetsIncomplets.ContainsKey(carta.IdPaquet))
+						paquetsIncomplets.Add(carta.IdPaquet, new Paquet(carta.NumParts, carta.IdPaquet));
 					
 					//vigilo que se reciban todas partes del paquete
 					for (int i = 0; i < carta.NumParts; i++)
@@ -220,10 +220,10 @@ public	class Missatger:IComparable
 					
 				}
 				//si estic esperant l'arrivada de la cartaPaquet
-				if (vigilantsActius.Existeix(carta.IdPaquet + "truetrue")) {
+				if (vigilantsActius.ContainsKey(carta.IdPaquet + "truetrue")) {
 	
 					vigilantsActius[carta.IdPaquet + "truetrue"].Abort();
-					vigilantsActius.Elimina(carta.IdPaquet + "truetrue");
+					vigilantsActius.Remove(carta.IdPaquet + "truetrue");
 				}
 				//envia carta
 				Envia(new CartaConfirmacio(carta.IdIntern, CartaConfirmacio.Tipus.cartaPaquet, true));//envio l'id intern de la carta...
@@ -235,28 +235,28 @@ public	class Missatger:IComparable
 					case CartaConfirmacio.Tipus.cartaPaquet:
 					case CartaConfirmacio.Tipus.cartaPartPaquet:
 
-						cartesPerEnviar.Elimina(carta.IdRebut);
+						cartesPerEnviar.Remove(carta.IdRebut);
 	
 						break;
 					case CartaConfirmacio.Tipus.partPaquet:
 			
-						partsNoEnviades.Elimina(carta.IdRebut);
+						partsNoEnviades.Remove(carta.IdRebut);
 		
 						esCarta = "false";
 						break;
 				}
-				if (vigilantsActius.Existeix(carta.IdRebut + esCarta + false)) {
+				if (vigilantsActius.ContainsKey(carta.IdRebut + esCarta + false)) {
 				
 					vigilantsActius[carta.IdRebut + esCarta + false].Abort();
-					vigilantsActius.Elimina(carta.IdRebut + esCarta + false);
+					vigilantsActius.Remove(carta.IdRebut + esCarta + false);
 				}
 				
 			} else if (objRebut is CartaReclamacio) {
 				CartaReclamacio carta = objRebut as CartaReclamacio;
 				if (carta.EsCarta) {
-					if (cartesPerEnviar.Existeix(carta.IdAReclamar))
+					if (cartesPerEnviar.ContainsKey(carta.IdAReclamar))
 						Envia(cartesPerEnviar[carta.IdAReclamar]);
-				} else if (partsNoEnviades.Existeix(carta.IdAReclamar))
+				} else if (partsNoEnviades.ContainsKey(carta.IdAReclamar))
 					Envia(partsNoEnviades[carta.IdAReclamar]);
 			}
 			
@@ -275,7 +275,7 @@ public	class Missatger:IComparable
 				Envia(cartaC.ToJson());
 			else if (cartaP != null) {
 				
-				cartesPerEnviar.Afegir(cartaP.IdPaquet, cartaP);
+				cartesPerEnviar.Add(cartaP.IdPaquet, cartaP);
 		
 				Vigila(cartaP.IdPaquet, true, false);
 				Envia(cartaP.ToJson());
@@ -308,9 +308,9 @@ public	class Missatger:IComparable
 		{
 			Thread filVigilant = new Thread(() => IVigila(idAVigilar, esCarta, shaDeRebre));
 			filVigilant.Name = idAVigilar + esCarta + shaDeRebre;
-			if (!vigilantsActius.Existeix(filVigilant.Name)) {
+			if (!vigilantsActius.ContainsKey(filVigilant.Name)) {
 		
-				vigilantsActius.Afegir(filVigilant.Name, filVigilant);
+				vigilantsActius.Add(filVigilant.Name, filVigilant);
 	
 				filVigilant.Start();
 			}
@@ -320,25 +320,25 @@ public	class Missatger:IComparable
 			Thread.Sleep(tempsEsperaVigilant);
 			if (shaDeRebre) {
 				if (esCarta) {
-					if (!cartesRebudes.Existeix(idAVigilar)) {
+					if (!cartesRebudes.ContainsKey(idAVigilar)) {
 						Envia(new CartaReclamacio(idAVigilar, esCarta));
 						IVigila(idAVigilar, esCarta, shaDeRebre);
 					}
 				} else {
-					if (!partsRebudes.Existeix(idAVigilar)) {
+					if (!partsRebudes.ContainsKey(idAVigilar)) {
 						Envia(new CartaReclamacio(idAVigilar, esCarta));
 						IVigila(idAVigilar, esCarta, shaDeRebre);
 					}
 				}
 			} else {
 				if (esCarta) {
-					if (cartesPerEnviar.Existeix(idAVigilar)) {
+					if (cartesPerEnviar.ContainsKey(idAVigilar)) {
 						Envia(cartesPerEnviar[idAVigilar].ToJson());
 						IVigila(idAVigilar, esCarta, shaDeRebre);
 						
 					}
 				} else {
-					if (partsNoEnviades.Existeix(idAVigilar)) {
+					if (partsNoEnviades.ContainsKey(idAVigilar)) {
 						Envia(partsNoEnviades[idAVigilar].ToJson());
 						IVigila(idAVigilar, esCarta, shaDeRebre);
 						
@@ -347,24 +347,24 @@ public	class Missatger:IComparable
 			}
 			
 			
-			if (vigilantsActius.Existeix(Thread.CurrentThread.Name)) {
+			if (vigilantsActius.ContainsKey(Thread.CurrentThread.Name)) {
 
-				vigilantsActius.Elimina(Thread.CurrentThread.Name);
+				vigilantsActius.Remove(Thread.CurrentThread.Name);
 		
 				Thread.CurrentThread.Abort();
 			}
 		}
 		void EntregaPaquet(string idPaquet)
 		{
-			if (paquetsIncomplets.Existeix(idPaquet) && cartesRebudes.Existeix(idPaquet)) {//i si esta la carta del paquet!!
+			if (paquetsIncomplets.ContainsKey(idPaquet) && cartesRebudes.ContainsKey(idPaquet)) {//i si esta la carta del paquet!!
 				Paquet paquetSenserAEntrear = paquetsIncomplets[idPaquet];
 				JsonObject objPerEntregar = (JsonObject)Desxifra(paquetSenserAEntrear.Contingut);
 				
 	
-				paquetsIncomplets.Elimina(idPaquet);
+				paquetsIncomplets.Remove(idPaquet);
 
 		
-				paquetsEntregats.Afegir(paquetSenserAEntrear.IdPaquet + "", paquetSenserAEntrear.IdPaquet + "");
+				paquetsEntregats.Add(paquetSenserAEntrear.IdPaquet + "", paquetSenserAEntrear.IdPaquet + "");
 			
 				
 				
@@ -377,10 +377,10 @@ public	class Missatger:IComparable
 					receptor.Reb(this, new ByteJson(objPerEntregar).Dades);
 				
 
-				paquetsEntregats.Afegir(idPaquet, idPaquet);
+				paquetsEntregats.Add(idPaquet, idPaquet);
 			
 				foreach (PartPaquet part in paquetSenserAEntrear)
-					partsRebudes.Elimina(part.Id);
+					partsRebudes.Remove(part.Id);
 
 			}
 		}
