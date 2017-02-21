@@ -16,7 +16,7 @@ namespace Gabriel.Cat.Xarxa
         const double TIEMPORENOVARINTENTOSIPPORDEFECTO = 4 * 60 * 60 * 1000;//cada 4 horas
 
         public  ServicioValidacionIP ServicioValidacionIP { get; set; }
-        ListaUnica<ClienteServidorHttpSeguro> clientes;
+        LlistaOrdenada<ClienteServidorHttpSeguro> clientes;
         System.Timers.Timer tmpResetIntentos;
         System.Threading.Semaphore smpResetIntentos;
         int maxIntentosCliente;
@@ -28,7 +28,7 @@ namespace Gabriel.Cat.Xarxa
             : base(prefixes)
         {
             MaxIntentosCliente = maxIntentosCliente;
-            clientes = new ListaUnica<ClienteServidorHttpSeguro>();
+            clientes = new LlistaOrdenada<ClienteServidorHttpSeguro>();
             tmpResetIntentos = new System.Timers.Timer();
             tmpResetIntentos.Elapsed += ResetIntentos;
             TiempoRenovarIntentosIp = tiempoRenovarIntentosIp;
@@ -93,7 +93,7 @@ namespace Gabriel.Cat.Xarxa
             string ipCliente = conexionNueva.Request.RemoteEndPoint.Address.ToString();
             string serialClinete = conexionNueva.Request.GetClientCertificate().SerialNumber;
             string idUnicoCliente = ipCliente + serialClinete;
-            bool existe = clientes.Contains(ipCliente+serialClinete);
+            bool existe = clientes.ContainsKey(ipCliente+serialClinete);
             if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
             {
                 Console.WriteLine("Hay una nueva conexion de la ip {0} y serial {1} ",ipCliente,serialClinete);
@@ -108,7 +108,7 @@ namespace Gabriel.Cat.Xarxa
                 {
                     if (tmpResetIntentos.Enabled)
                         smpResetIntentos.WaitOne();//hace que vayan uno a uno...quizas pierde rendimiento
-                    if (!clientes.Contains(idUnicoCliente))
+                    if (!clientes.ContainsKey(idUnicoCliente))
                     {
                         if (System.Diagnostics.Debugger.IsAttached || ShowDebbugMessages)
                         {
@@ -178,13 +178,15 @@ namespace Gabriel.Cat.Xarxa
 
         private void ResetIntentos(object sender, ElapsedEventArgs e)
         {
-            ClienteServidorHttpSeguro[] clientes;
+            ClienteServidorHttpSeguro cliente;
             smpResetIntentos.WaitOne();
-            clientes = this.clientes.ToArray();
-            for (int i = 0; i < clientes.Length; i++)
-                if (!clientes[i].Bloqueado||clientes[i].Conexiones>=maxIntentosCliente)//los que se han excedido de intentos los desbaneo los otros se quedan por presunto ataque hacker ;)
-                    this.clientes.Remove(clientes[i]);//los elimino porque la clave ip se va renovando asi que habrian al final muchas ips no usadas nunca...y supondria un problema :)
 
+            for (int i = 0; i < clientes.Count; i++)
+            {
+                cliente = clientes.GetValueAt(i);
+                if (!cliente.Bloqueado || cliente.Conexiones >= maxIntentosCliente)//los que se han excedido de intentos los desbaneo los otros se quedan por presunto ataque hacker ;)
+                    this.clientes.Remove(clientes[i]);//los elimino porque la clave ip se va renovando asi que habrian al final muchas ips no usadas nunca...y supondria un problema :)
+            }
             smpResetIntentos.Release();
         }
     }
