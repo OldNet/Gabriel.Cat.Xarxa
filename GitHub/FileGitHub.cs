@@ -67,7 +67,6 @@ namespace Gabriel.Cat
 			System.Windows.Forms.HtmlDocument wbFile;
 			string lastComitOnline=null;
 			bool actualizado;
-			bool acabadoDeDescargar=false;
 			System.Windows.Forms.HtmlElementCollection links;
 			if(!linkFileGitHub.Exist())
 				throw new FileNotFoundOnGithubException(linkFileGitHub);
