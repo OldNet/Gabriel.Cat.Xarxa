@@ -67,18 +67,14 @@ namespace Gabriel.Cat
 
 		bool UpdateLastFileId()
 		{
-			System.Windows.Forms.HtmlDocument wcFile;
 			string lastComitOnline=null;
 			bool actualizado;
+			
+			//si no existe el archivo lanzo una excepcion
 			if(!linkFileGitHub.Exist())
 				throw new FileNotFoundOnGithubException(linkFileGitHub);
 			//obtengo el commit del archivo
-
-			wcFile=linkFileGitHub.DownloadUrl();
 			
-			lastComitOnline=wcFile.FindElementByAttribute("class","commit-tease-sha")[0].InnerText;
-			
-			//si no existe el archivo lanzo una excepcion
 			actualizado = !String.Equals(lastCommitId, lastComitOnline);
 			if (actualizado)
 				lastCommitId = lastComitOnline;
