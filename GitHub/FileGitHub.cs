@@ -20,7 +20,7 @@ namespace Gabriel.Cat
 	public class FileGitHub:IComparable,IClauUnicaPerObjecte
 	{
 		public static LlistaOrdenada<FileGitHub> FilesToManage{ get; private set; }
-		
+		public const string URLGITHUB="https://github.com";
 		Uri pathFile;
 		Uri linkFileGitHub;
 		string lastCommitId;
@@ -35,7 +35,8 @@ namespace Gabriel.Cat
 			this.linkFileGitHub=linkFileGitHub;
 			this.lastCommitId=lastCommitId;
 		}
-		private FileGitHub(string[] parts):this(new Uri(parts[0]),new Uri(parts[1]),parts[2])
+		private FileGitHub(string[] parts):
+			this(new Uri(parts[1]),new Uri(parts[0]),parts[2])
 		{}
 
 		#region IClauUnicaPerObjecte implementation
@@ -53,12 +54,14 @@ namespace Gabriel.Cat
 		public void UpdateFile()
 		{
 			WebClient wcFile;
+			string pathArchivoRelativo;
 			if (UpdateLastFileId()) {
 				//si no esta actualizado
 				wcFile = new WebClient();
 				if (File.Exists(pathFile.AbsolutePath))
 					File.Delete(pathFile.AbsolutePath);
-				File.WriteAllBytes(pathFile.AbsolutePath, wcFile.DownloadData(linkFileGitHub.AbsolutePath));
+				pathArchivoRelativo=linkFileGitHub.DownloadUrl().GetElementById("raw-url").GetAttribute("href").Split(':')[1];
+				File.WriteAllBytes(pathFile.AbsolutePath, wcFile.DownloadData(URLGITHUB+pathArchivoRelativo));
 			}
 		}
 
@@ -73,10 +76,9 @@ namespace Gabriel.Cat
 			//obtengo el commit del archivo
 
 			wbFile=linkFileGitHub.DownloadUrl();
+			
 			links=wbFile.GetElementsByTagName("a");
-			for(int i=0;i<links.Count&&lastComitOnline==null;i++)
-				if(links[i].GetAttribute("class")=="commit-tease-sha")
-					lastComitOnline=links[i].InnerText;
+			lastComitOnline=links.FiltraPorClase("commit-tease-sha")[0].InnerText;
 			//si no existe el archivo lanzo una excepcion
 			actualizado = !String.Equals(lastCommitId, lastComitOnline);
 			if (actualizado)
@@ -101,7 +103,10 @@ namespace Gabriel.Cat
 		#endregion
 		public override string ToString()
 		{
-			return pathFile.ToString()+";"+linkFileGitHub.ToString()+";"+lastCommitId;
+			string pathArchivoGitHub=linkFileGitHub.AbsolutePath;
+			if(!pathArchivoGitHub.Contains(URLGITHUB))
+				pathArchivoGitHub=URLGITHUB+pathArchivoGitHub;
+			return pathFile.AbsolutePath+";"+pathArchivoGitHub+";"+lastCommitId;
 		}
 		/// <summary>
 		/// Actualiza los archivos
@@ -125,19 +130,19 @@ namespace Gabriel.Cat
 		public static void UpdateDiccionary(Uri pathDiccionary)
 		{
 			List<string> filesString=new List<string>();
-			if(File.Exists(pathDiccionary.ToString()))
-				File.Delete(pathDiccionary.ToString());
+			if(File.Exists(pathDiccionary.AbsolutePath))
+				File.Delete(pathDiccionary.AbsolutePath);
 			for(int i=0;i<FilesToManage.Count;i++)
 				filesString.Add(FilesToManage.GetValueAt(i).ToString());
-			File.WriteAllLines(pathDiccionary.ToString(),filesString.ToArray());
+			File.WriteAllLines(pathDiccionary.AbsolutePath,filesString.ToArray());
 		}
 		public static void LoadDiccionary(Uri pathDiccionary)
 		{
 			string[] filesDic;
-			if(File.Exists(pathDiccionary.ToString()))
+			if(File.Exists(pathDiccionary.AbsolutePath))
 			{
 				
-				filesDic=File.ReadAllLines(pathDiccionary.ToString());
+				filesDic=File.ReadAllLines(pathDiccionary.AbsolutePath);
 				for(int i=0;i<filesDic.Length;i++)
 					FilesToManage.Add(new FileGitHub(filesDic[i].Split(';')));
 			}

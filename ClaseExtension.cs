@@ -78,17 +78,51 @@ namespace Gabriel.Cat.Extension
 			}
 			return exist;
 		}
+		public static HtmlElement FindElementById(this HtmlDocument doc,string contenido)
+		{
+			HtmlElement elementToFound=null;
+			string aux;
+			for(int i=0;i<doc.Body.All.Count&&elementToFound==null;i++)
+			{
+				try{
+					aux=doc.Body.All[i].GetAttribute("id");
+					if(aux==contenido)
+						elementToFound=doc.Body.All[i];
+					
+				}
+				catch{}
+			}
+			return elementToFound;
+		}
+		public static HtmlElement[] FiltraPorClase(this HtmlElementCollection elementos,string clase)
+		{
+			List<HtmlElement> lstElementos=new List<HtmlElement>();
+			string aContener;
+			if(clase.Filtra((c)=>c==' ').Count>0)
+				aContener="class=\""+clase+"\"";
+			else aContener="class="+clase;
+			for(int i=0;i<elementos.Count;i++)
+				if(elementos[i].OuterHtml.Contains(aContener))
+					lstElementos.Add(elementos[i]);
+			return lstElementos.ToArray();
+		}
 		public static HtmlDocument DownloadUrl(this Uri uriWeb)
 		{
-			WebBrowser	wbFile=new WebBrowser();
-			bool acabadoDeDescargar=false;
-			wbFile.Navigated+=(s,e)=>{
-				acabadoDeDescargar=true;
-			};
-			wbFile.Navigate(uriWeb);
-			while(!acabadoDeDescargar)
-				System.Threading.Thread.Sleep(150);
-			return wbFile.Document;
+			string textoWeb;
+			WebClient wcFile=new WebClient();
+			textoWeb=wcFile.DownloadString(uriWeb);
+			return GetHtmlDocument(textoWeb);
+		}
+
+		private static System.Windows.Forms.HtmlDocument GetHtmlDocument(string html)
+		{//sacado de http://stackoverflow.com/questions/4935446/string-to-htmldocument
+			System.Windows.Forms.WebBrowser browser = new System.Windows.Forms.WebBrowser();
+			browser.ScriptErrorsSuppressed = true;
+			browser.DocumentText = html;
+			browser.Document.OpenNew(true);
+			browser.Document.Write(html);
+			browser.Refresh();
+			return browser.Document;
 		}
 	}
 }
