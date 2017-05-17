@@ -67,18 +67,17 @@ namespace Gabriel.Cat
 
 		bool UpdateLastFileId()
 		{
-			System.Windows.Forms.HtmlDocument wbFile;
+			System.Windows.Forms.HtmlDocument wcFile;
 			string lastComitOnline=null;
 			bool actualizado;
-			System.Windows.Forms.HtmlElementCollection links;
 			if(!linkFileGitHub.Exist())
 				throw new FileNotFoundOnGithubException(linkFileGitHub);
 			//obtengo el commit del archivo
 
-			wbFile=linkFileGitHub.DownloadUrl();
+			wcFile=linkFileGitHub.DownloadUrl();
 			
-			links=wbFile.GetElementsByTagName("a");
-			lastComitOnline=links.FiltraPorClase("commit-tease-sha")[0].InnerText;
+			lastComitOnline=wcFile.FindElementByAttribute("class","commit-tease-sha")[0].InnerText;
+			
 			//si no existe el archivo lanzo una excepcion
 			actualizado = !String.Equals(lastCommitId, lastComitOnline);
 			if (actualizado)
@@ -119,7 +118,7 @@ namespace Gabriel.Cat
 			for (int i = 0; i < FilesToManage.Count; i++)
 				try {
 				FilesToManage.GetValueAt(i).UpdateFile();
-			} catch {
+			} catch (Exception e){
 				if(eliminarDelDiccionariSiNoEstaOnline)
 					filesRemoved.Add(FilesToManage.GetValueAt(i));
 			}

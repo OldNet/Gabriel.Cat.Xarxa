@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Gabriel.Cat;
+using Gabriel.Cat.Extension;
 namespace Gabriel.Cat.Extension
 {
 	public static class ClaseExtensionXarxa
@@ -78,33 +79,14 @@ namespace Gabriel.Cat.Extension
 			}
 			return exist;
 		}
-		public static HtmlElement FindElementById(this HtmlDocument doc,string contenido)
+		public static HtmlElement[] FindElementByAttribute(this HtmlDocument doc,string attribute,string contenido)
 		{
-			HtmlElement elementToFound=null;
-			string aux;
-			for(int i=0;i<doc.Body.All.Count&&elementToFound==null;i++)
-			{
-				try{
-					aux=doc.Body.All[i].GetAttribute("id");
-					if(aux==contenido)
-						elementToFound=doc.Body.All[i];
-					
-				}
-				catch{}
-			}
-			return elementToFound;
-		}
-		public static HtmlElement[] FiltraPorClase(this HtmlElementCollection elementos,string clase)
-		{
-			List<HtmlElement> lstElementos=new List<HtmlElement>();
-			string aContener;
-			if(clase.Filtra((c)=>c==' ').Count>0)
-				aContener="class=\""+clase+"\"";
-			else aContener="class="+clase;
-			for(int i=0;i<elementos.Count;i++)
-				if(elementos[i].OuterHtml.Contains(aContener))
-					lstElementos.Add(elementos[i]);
-			return lstElementos.ToArray();
+			HtmlElement[] elements;
+			if(doc.Body.OuterHtml.Contains(attribute+"="+contenido)||doc.Body.OuterHtml.Contains(attribute+"=\""+contenido+"\""))
+				elements= doc.All.Casting<HtmlElement>().Filtra(elemento=>elemento.OuterHtml!=null&&(elemento.OuterHtml.Contains(attribute+"="+contenido)||elemento.OuterHtml.Contains(attribute+"=\""+contenido+"\""))).ToArray();
+			else
+				elements=new HtmlElement[0];
+			return elements;
 		}
 		public static HtmlDocument DownloadUrl(this Uri uriWeb)
 		{
